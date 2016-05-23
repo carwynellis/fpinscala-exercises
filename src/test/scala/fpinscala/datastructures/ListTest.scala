@@ -66,4 +66,20 @@ class ListTest extends FunSuite {
     val l = List(1,2,3)
     assertResult(List(3,2,1)) { List.reverse(l) }
   }
+
+  test("foldLeftUsingRight returns expected result for a simple function") {
+    val l = List(1,2,3)
+    assertResult(6) { List.foldLeftUsingRight(l, 0)( (x,y) => x + y) }
+  }
+
+  test("foldRightUsingLeft returns expected result for a simple function") {
+    val l = List(1,2,3)
+    assertResult(6) { List.foldRightUsingLeft(l, 0)( (x,y) => x + y) }
+  }
+
+  test("appendF should produce a new list formed of first and second lists") {
+    val l = List(1,2,3)
+    val m = List(4,5,6)
+    assertResult(List(1,2,3,4,5,6)) { List.appendF(l, m) }
+  }
 }

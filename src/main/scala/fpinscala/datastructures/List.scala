@@ -92,5 +92,13 @@ object List { // `List` companion object. Contains functions for creating and wo
   def reverse[A](l: List[A]): List[A] =
     foldLeft(l: List[A], List[A]())((accumulator: List[A], element: A) => Cons(element, accumulator))
 
+  // Solutions have a different implementation. Note that reverse is implemented using foldLeft!
+  // See - https://github.com/fpinscala/fpinscala/blob/master/answerkey/datastructures/13.answer.scala
+  def foldLeftUsingRight[A,B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(reverse(as), z)((b,a) => f(a,b))
+
+  def foldRightUsingLeft[A,B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(reverse(as), z)((b,a) => f(a,b))
+
+  def appendF[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)((e: A, acc: List[A]) => Cons(e, acc))
+
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
