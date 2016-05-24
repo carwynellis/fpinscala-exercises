@@ -82,4 +82,11 @@ class ListTest extends FunSuite {
     val m = List(4,5,6)
     assertResult(List(1,2,3,4,5,6)) { List.appendF(l, m) }
   }
+
+  test("concatLists should return a single list containing combined content of specified lists") {
+    val l = List(1,2,3)
+    val m = List(4,5,6)
+    val n = List(7,8,9)
+    assertResult(List(1,2,3,4,5,6,7,8,9)) { List.concatLists(List(l, m, n)) }
+  }
 }

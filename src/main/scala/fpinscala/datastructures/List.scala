@@ -9,7 +9,8 @@ which may be `Nil` or another `Cons`.
  */
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
-object List { // `List` companion object. Contains functions for creating and working with lists.
+object List {
+  // `List` companion object. Contains functions for creating and working with lists.
   def sum(ints: List[Int]): Int = ints match { // A function that uses pattern matching to add up a list of integers
     case Nil => 0 // The sum of the empty list is 0.
     case Cons(x,xs) => x + sum(xs) // The sum of a list starting with `x` is `x` plus the sum of the rest of the list.
@@ -99,6 +100,9 @@ object List { // `List` companion object. Contains functions for creating and wo
   def foldRightUsingLeft[A,B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(reverse(as), z)((b,a) => f(a,b))
 
   def appendF[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)((e: A, acc: List[A]) => Cons(e, acc))
+
+  def concatLists[A](l: List[List[A]]): List[A] =
+    foldRight(l, List[A]())((acc: List[A], elem: List[A]) => append(acc, elem))
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
