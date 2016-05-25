@@ -102,11 +102,17 @@ object List {
   def appendF[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)((e: A, acc: List[A]) => Cons(e, acc))
 
   def concatLists[A](l: List[List[A]]): List[A] =
-    foldRight(l, List[A]())((acc: List[A], elem: List[A]) => append(acc, elem))
+    foldRightUsingLeft(l, List[A]())((acc: List[A], elem: List[A]) => append(acc, elem))
 
-  def addOneToIntList(l: List[Int]): List[Int] = foldRight(l, List[Int]())((e: Int, acc: List[Int]) => Cons(e+1, acc))
+  def addOneToIntList(l: List[Int]): List[Int] =
+    foldRightUsingLeft(l, List[Int]())((e: Int, acc: List[Int]) => Cons(e+1, acc))
 
-  def listDoubleToListString(l: List[Double]): List[String] = foldRight(l, List[String]())((e: Double, acc: List[String]) => Cons(s"$e", acc))
+  def listDoubleToListString(l: List[Double]): List[String] =
+    foldRightUsingLeft(l, List[String]())((e: Double, acc: List[String]) => Cons(s"$e", acc))
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = foldRight(l, List[B]())((e: A, acc: List[B]) => Cons(f(e), acc))
+  def map[A,B](l: List[A])(f: A => B): List[B] =
+    foldRightUsingLeft(l, List[B]())((e: A, acc: List[B]) => Cons(f(e), acc))
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRightUsingLeft(as, List[A]())((e: A, acc: List[A]) => if(f(e)) acc else Cons(e, acc))
 }

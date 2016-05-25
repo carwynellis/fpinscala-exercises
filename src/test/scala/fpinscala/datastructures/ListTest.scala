@@ -111,4 +111,10 @@ class ListTest extends FunSuite {
     val f = (i: Int) => s"$i"
     assertResult(List("1", "2", "3")) { List.map(l)(f) }
   }
+
+  test("filter removes elements from a list that satisfy a given predicate") {
+    val l = List(1,2,3,4,5)
+    val p = (i: Int) => i % 2 == 1
+    assertResult(List(2,4)) { List.filter(l)(p) }
+  }
 }
