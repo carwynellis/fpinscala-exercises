@@ -117,4 +117,10 @@ class ListTest extends FunSuite {
     val p = (i: Int) => i % 2 == 1
     assertResult(List(2,4)) { List.filter(l)(p) }
   }
+
+  test("flatMap produces expected results") {
+    val l = List(1,2,3)
+    val f = (i: Int) => List(i,i)
+    assertResult(List(1,1,2,2,3,3)) { List.flatMap(l)(f) }
+  }
 }
