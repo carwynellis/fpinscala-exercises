@@ -106,7 +106,7 @@ object List {
 
   def addOneToIntList(l: List[Int]): List[Int] = foldRight(l, List[Int]())((e: Int, acc: List[Int]) => Cons(e+1, acc))
 
-  def listDoubleToListString(l: List[Double]): List[String] = ???
+  def listDoubleToListString(l: List[Double]): List[String] = foldRight(l, List[String]())((e: Double, acc: List[String]) => Cons(s"$e", acc))
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }

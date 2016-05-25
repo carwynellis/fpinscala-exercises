@@ -94,4 +94,9 @@ class ListTest extends FunSuite {
     val l = List(1,2,3)
     assertResult(List(2,3,4)) { List.addOneToIntList(l) }
   }
+
+  test("listDoubleToListString converts list of doubles into list of strings") {
+    val l = List(1.0, 2.0, 3.0)
+    assertResult(List("1.0", "2.0", "3.0")) { List.listDoubleToListString(l) }
+  }
 }
