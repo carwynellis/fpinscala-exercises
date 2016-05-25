@@ -123,4 +123,10 @@ class ListTest extends FunSuite {
     val f = (i: Int) => List(i,i)
     assertResult(List(1,1,2,2,3,3)) { List.flatMap(l)(f) }
   }
+
+  test("filterUsingFlatMap removes elements from a list that satisfy a given predicate") {
+    val l = List(1,2,3,4,5)
+    val p = (i: Int) => i % 2 == 1
+    assertResult(List(2,4)) { List.filterUsingFlatMap(l)(p) }
+  }
 }
