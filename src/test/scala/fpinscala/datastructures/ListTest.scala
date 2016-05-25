@@ -89,4 +89,9 @@ class ListTest extends FunSuite {
     val n = List(7,8,9)
     assertResult(List(1,2,3,4,5,6,7,8,9)) { List.concatLists(List(l, m, n)) }
   }
+
+  test("addOneToIntList returns input list with one added to each element") {
+    val l = List(1,2,3)
+    assertResult(List(2,3,4)) { List.addOneToIntList(l) }
+  }
 }
