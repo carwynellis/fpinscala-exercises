@@ -99,4 +99,16 @@ class ListTest extends FunSuite {
     val l = List(1.0, 2.0, 3.0)
     assertResult(List("1.0", "2.0", "3.0")) { List.listDoubleToListString(l) }
   }
+
+  test("map transforms a list correctly") {
+    val l = List(1,2,3)
+    val f = (i: Int) => i * 2
+    assertResult(List(2,4,6)) { List.map(l)(f) }
+  }
+
+  test("map transforms a list into a different type correctly") {
+    val l = List(1,2,3)
+    val f = (i: Int) => s"$i"
+    assertResult(List("1", "2", "3")) { List.map(l)(f) }
+  }
 }

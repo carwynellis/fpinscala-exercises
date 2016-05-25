@@ -108,5 +108,5 @@ object List {
 
   def listDoubleToListString(l: List[Double]): List[String] = foldRight(l, List[String]())((e: Double, acc: List[String]) => Cons(s"$e", acc))
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def map[A,B](l: List[A])(f: A => B): List[B] = foldRight(l, List[B]())((e: A, acc: List[B]) => Cons(f(e), acc))
 }
