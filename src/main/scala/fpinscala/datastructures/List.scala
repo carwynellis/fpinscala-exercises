@@ -120,4 +120,19 @@ object List {
 
   def filterUsingFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
     flatMap(as)(e => if (f(e)) Nil else List(e))
+
+  def head[A](l: List[A]): A = l match {
+    case Cons(h, _) => h
+    case Nil => throw new NoSuchElementException
+  }
+
+  // TODO - would be nicer to foldRight so no reverse is required
+  def combineAndSumLists(a1: List[Int], a2: List[Int]): List[Int] = {
+    @tailrec
+    def loop(l: List[Int], m: List[Int], acc: List[Int]): List[Int] = l match {
+      case Cons(h, _) => loop(tail(l), tail(m), Cons(h + head(m), acc))
+      case Nil => acc
+    }
+    reverse(loop(a1, a2, List()))
+  }
 }

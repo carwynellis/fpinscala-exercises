@@ -129,4 +129,10 @@ class ListTest extends FunSuite {
     val p = (i: Int) => i % 2 == 1
     assertResult(List(2,4)) { List.filterUsingFlatMap(l)(p) }
   }
+
+  test("combine and sum lists returns a new list composed of the sum of corresponding elements") {
+    val l = List(1,2,3)
+    val m = List(4,5,6)
+    assertResult(List(5,7,9)) { List.combineAndSumLists(l, m) }
+  }
 }
