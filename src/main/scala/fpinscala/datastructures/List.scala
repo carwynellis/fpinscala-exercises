@@ -145,4 +145,17 @@ object List {
     }
     reverse(loop(a1, a2, List()))
   }
+
+  /**
+    * ZipWithFromAnswers
+    *
+    * Note reference to 3 types so more general.
+    *
+    * This implementation is now tail recursive however.
+    */
+  def zipWithFromAnswers[A,B,C](a: List[A], b: List[B])(f: (A,B) => C): List[C] = (a,b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1,t1), Cons(h2,t2)) => Cons(f(h1,h2), zipWithFromAnswers(t1,t2)(f))
+  }
 }
