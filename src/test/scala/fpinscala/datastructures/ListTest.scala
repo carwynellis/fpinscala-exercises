@@ -135,4 +135,11 @@ class ListTest extends FunSuite {
     val m = List(4,5,6)
     assertResult(List(5,7,9)) { List.combineAndSumLists(l, m) }
   }
+
+  test("zipWith combines corresponding elements of two lists using a specified function correctly") {
+    val l = List(1,2,3)
+    val m = List(4,5,6)
+    val f = (a: Int, b: Int) => s"$a~$b"
+    assertResult(List("1~4", "2~5", "3~6")) { List.zipWith(l, m)(f) }
+  }
 }

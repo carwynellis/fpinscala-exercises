@@ -135,4 +135,14 @@ object List {
     }
     reverse(loop(a1, a2, List()))
   }
+
+  // TODO - would be nicer to foldRight so no reverse is required
+  def zipWith[A,B](a1: List[A], a2: List[A])(f: (A,A) => B): List[B] = {
+    @tailrec
+    def loop(l: List[A], m: List[A], acc: List[B]): List[B] = l match {
+      case Cons(h, _) => loop(tail(l), tail(m), Cons(f(h, head(m)), acc))
+      case Nil => acc
+    }
+    reverse(loop(a1, a2, List()))
+  }
 }
