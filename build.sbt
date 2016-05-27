@@ -1,4 +1,4 @@
-name := "getting-started-with-akka"
+name := "fpinscala-exercises"
 
 version := "1.0"
 
