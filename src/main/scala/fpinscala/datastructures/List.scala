@@ -158,4 +158,31 @@ object List {
     case (_, Nil) => Nil
     case (Cons(h1,t1), Cons(h2,t2)) => Cons(f(h1,h2), zipWithFromAnswers(t1,t2)(f))
   }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    // TODO - since we're iterating left to right we will build candidate lists
+    //        in reverse, so the sublist needs to be reversed for comparison
+    val reversedSub = reverse(sub)
+
+    @tailrec
+    def loop(l: List[A], acc: List[A]): Boolean = l match {
+      case Cons(h, t) =>
+        val candidate = Cons(h, acc)
+        if (candidate == reversedSub) true
+        else loop(t, candidate)
+      case Nil => false
+    }
+
+    @tailrec
+    def testLoop(l: List[A]): Boolean = {
+      if (l == Nil ) false
+      else
+        loop(l, List()) match {
+          case true => true
+          case false => testLoop(tail(l))
+        }
+    }
+
+    testLoop(sup)
+  }
 }

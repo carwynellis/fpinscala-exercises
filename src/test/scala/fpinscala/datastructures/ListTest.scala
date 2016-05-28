@@ -149,4 +149,10 @@ class ListTest extends FunSuite {
     val f = (a: Int, b: Double) => s"$a~$b"
     assertResult(List("1~0.5", "2~1.5", "3~3.5")) { List.zipWithFromAnswers(l, m)(f) }
   }
+
+  test("hasSubsequence returns expected result for a given list and subsequence") {
+    val l = List(1,2,3,4,5)
+    val s = List(3,4)
+    assertResult(true) { List.hasSubsequence(l, s) }
+  }
 }
