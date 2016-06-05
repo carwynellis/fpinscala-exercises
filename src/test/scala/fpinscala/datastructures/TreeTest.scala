@@ -50,4 +50,24 @@ class TreeTest extends FunSuite {
       Tree.map(t)((i: Int) => i + 1)
     }
   }
+
+  test("fold returns expected result when applied over a simple tree") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
+    assertResult(6) { Tree.fold(t)(i => i)((x: Int, y: Int) => x + y) }
+  }
+
+  test("sizeFold returns the number of nodes in a tree correctly") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Branch(Leaf(3), Leaf(4))))
+    assertResult(7) { Tree.sizeFold(t) }
+  }
+
+  test("maximumFold returns the maximum of a tree of ints") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Branch(Leaf(3), Leaf(4))))
+    assertResult(4) { Tree.maximumFold(t) }
+  }
+
+  test("depthFold returns the correct depth of a given tree") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Branch(Leaf(3), Leaf(4))))
+    assertResult(3) { Tree.depthFold(t) }
+  }
 }
