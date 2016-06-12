@@ -57,4 +57,16 @@ class OptionTest extends FunSuite with Matchers {
       result should be(0.00666 +- 0.0001)
     }
   }
+
+  test("map2 applies function to two options correctly") {
+    Option.map2(someInt, someInt)(_ + _) should be(Some(2))
+  }
+
+  test("map2 returns none if first option is none") {
+    Option.map2(none, someInt)((x: Int, y: Int) => x + y) should be(None)
+  }
+
+  test("map2 returns none if second option is none") {
+    Option.map2(someInt, none)((x: Int, y: Int) => x + y) should be(None)
+  }
 }
