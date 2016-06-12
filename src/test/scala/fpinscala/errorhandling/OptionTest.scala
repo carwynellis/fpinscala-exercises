@@ -71,7 +71,12 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("sequence returns a list of values for a given list of options") {
-    val sequence = List(Some(1), Some(2), Some(3))
-    Option.sequence[Int](sequence) should be(Some(List(1,2,3)))
+    val list = List(Some(1), Some(2), Some(3))
+    Option.sequence[Int](list) should be(Some(List(1,2,3)))
+  }
+
+  test("sequence returns none for a list containing a None") {
+    val list = List(Some(1), None, Some(3))
+    Option.sequence[Int](list) should be(None)
   }
 }
