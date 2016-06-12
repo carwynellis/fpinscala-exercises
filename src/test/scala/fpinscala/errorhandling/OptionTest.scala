@@ -69,4 +69,9 @@ class OptionTest extends FunSuite with Matchers {
   test("map2 returns none if second option is none") {
     Option.map2(someInt, none)((x: Int, y: Int) => x + y) should be(None)
   }
+
+  test("sequence returns a list of values for a given list of options") {
+    val sequence = List(Some(1), Some(2), Some(3))
+    Option.sequence[Int](sequence) should be(Some(List(1,2,3)))
+  }
 }
