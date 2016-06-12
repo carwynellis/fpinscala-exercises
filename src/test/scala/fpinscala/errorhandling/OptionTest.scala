@@ -1,8 +1,8 @@
 package fpinscala.errorhandling
 
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 
-class OptionTest extends FunSuite {
+class OptionTest extends FunSuite with Matchers {
 
   val someInt = Some(1)
   val none = None
@@ -49,5 +49,12 @@ class OptionTest extends FunSuite {
 
   test("filter should return None when applied to an empty option") {
     assertResult(None) { none.filter(i => 1 == 1) }
+  }
+
+  test("variance computes correct result for simple sequence") {
+    val data = Seq(0.1, 0.2, 0.3)
+    Option.variance(data).map { result =>
+      result should be(0.00666 +- 0.0001)
+    }
   }
 }
