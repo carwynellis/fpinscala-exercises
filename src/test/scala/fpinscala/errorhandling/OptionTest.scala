@@ -5,14 +5,13 @@ import org.scalatest.{FunSuite, Matchers}
 class OptionTest extends FunSuite with Matchers {
 
   val someInt = Some(1)
-  val none = None
 
   test("map should return a new option modified by the specified function") {
     assertResult(Some("1")) { someInt.map(i => s"$i") }
   }
 
   test("map should return None when applied to an empty option") {
-    assertResult(None) { none.map(i => s"$i") }
+    assertResult(None) { None.map(i => s"$i") }
   }
 
   test("getOrElse should return option value where present") {
@@ -20,7 +19,7 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("getOrElse should return the default value where no value is present") {
-    assertResult(0) { none.getOrElse(0) }
+    assertResult(0) { None.getOrElse(0) }
   }
 
   test("flatMap should return a new option containing the result of the specified function") {
@@ -28,7 +27,7 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("flatMap should return None when applied to an empty option") {
-    assertResult(None) { none.flatMap(i => Some(s"$i")) }
+    assertResult(None) { None.flatMap(i => Some(s"$i")) }
   }
 
   test("orElse should return the value when applied to an option with a value") {
@@ -36,7 +35,7 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("orElse should return the option paramter when applied to an empty option") {
-    assertResult(Some(2)) { none.orElse(Some(2)) }
+    assertResult(Some(2)) { None.orElse(Some(2)) }
   }
 
   test("filter should return current option with value if the value satisfies the predicate") {
@@ -48,7 +47,7 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("filter should return None when applied to an empty option") {
-    assertResult(None) { none.filter(i => 1 == 1) }
+    assertResult(None) { None.filter(i => 1 == 1) }
   }
 
   test("variance computes correct result for simple sequence") {
@@ -63,11 +62,11 @@ class OptionTest extends FunSuite with Matchers {
   }
 
   test("map2 returns none if first option is none") {
-    Option.map2(none, someInt)((x: Int, y: Int) => x + y) should be(None)
+    Option.map2(None, someInt)((x: Int, y: Int) => x + y) should be(None)
   }
 
   test("map2 returns none if second option is none") {
-    Option.map2(someInt, none)((x: Int, y: Int) => x + y) should be(None)
+    Option.map2(someInt, None)((x: Int, y: Int) => x + y) should be(None)
   }
 
   test("sequence returns a list of values for a given list of options") {
@@ -78,5 +77,20 @@ class OptionTest extends FunSuite with Matchers {
   test("sequence returns none for a list containing a None") {
     val list = List(Some(1), None, Some(3))
     Option.sequence[Int](list) should be(None)
+  }
+
+  test("traverseWithMap returns a modified list wrapped in a Some() when all operations successful") {
+    val list = List(1, 2, 3)
+    Option.traverseWithMap(list)(i => Some(i * 2)) should be(Some(List(2,4,6)))
+  }
+
+  test("traverse returns a modified list wrapped in a Some() when all operations successful") {
+    val list = List(1, 2, 3)
+    Option.traverse(list)(i => Some(i * 2)) should be(Some(List(2,4,6)))
+  }
+
+  test("traverse returns none if one of the operations fails") {
+    val list = List(1, 2, 3)
+    Option.traverse(list)(i => if(i == 2) None else Some(i)) should be(None)
   }
 }
