@@ -42,4 +42,34 @@ class EitherTest extends FunSuite with Matchers {
   test("map2 returns left if applied to a right value with a left value") {
     rightVal.map2(leftVal)((a: Int, b: Int) => a + b) should be(leftVal)
   }
+
+  test("traverse returns a Right(List[B]) when no failures occurred") {
+    val data = List(1,2,3)
+    Either.traverse(data)((i: Int) => Right(i + 1)) should be(Right(List(2,3,4)))
+  }
+
+  test("traverse returns the first failure that occurred") {
+    val data = List(1,2,3)
+    Either.traverse(data)((i: Int) => Left(i)) should be(Left(1))
+  }
+
+  test("traverse returns only the failure if preceded by successful elements") {
+    val data = List(1,2,3)
+    Either.traverse(data)((i: Int) => if(i == 2) Left(i) else Right(i)) should be(Left(2))
+  }
+
+  test("sequence returns a Right(List[A]) if no Left() elements are present") {
+    val data = List(Right(1), Right(2), Right(3))
+    Either.sequence(data) should be(Right(List(1,2,3)))
+  }
+
+  test("sequence returns the first Left() in a list of Eithers") {
+    val data = List(Left(1), Right(2), Right(3))
+    Either.sequence(data) should be(Left(1))
+  }
+
+  test("sequence returns the first Left() preceded by Right() elements in a list of Either") {
+    val data = List(Right(1), Left(2), Right(3))
+    Either.sequence(data) should be(Left(2))
+  }
 }

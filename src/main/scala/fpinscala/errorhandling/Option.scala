@@ -59,7 +59,7 @@ object Option {
 
   // Without map2 we would need to match and recurse cons-ing the result of the recursive call to build the list.
   def sequence[A](a: List[Option[A]]): Option[List[A]] =
-    // Note - the type info on the accumulator param.
+    // Note - the type parameter to foldRight must be specified.
     a.foldRight[Option[List[A]]](Some(Nil))((elem, acc) => map2(elem, acc)(_ :: _))
 
   // Inefficient because the list is traversed twice
