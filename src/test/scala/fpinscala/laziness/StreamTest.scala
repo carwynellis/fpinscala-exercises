@@ -18,4 +18,7 @@ class StreamTest extends FunSuite with Matchers {
     stream.drop(2).toList should be(List(3))
   }
 
+  test("takeWhile should return all elements until the predicate is false") {
+    stream.takeWhile(i => i < 3).toList should be(List(1,2))
+  }
 }
