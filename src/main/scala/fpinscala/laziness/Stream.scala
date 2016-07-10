@@ -20,9 +20,16 @@ trait Stream[+A] {
 
   def toList: List[A] = this.foldRight(List.empty[A])((elem, acc) => elem :: acc)
 
-  def take(n: Int): Stream[A] = sys.error("todo")
+  def take(n: Int): Stream[A] = this match {
+    case Empty => Empty
+    case Cons(h, t) => if (n == 0) Empty else cons[A](h(), t().take(n - 1))
+  }
 
-  def drop(n: Int): Stream[A] = sys.error("todo")
+  @annotation.tailrec
+  final def drop(n: Int): Stream[A] = this match {
+    case Empty => Empty
+    case Cons(h, t) => if (n == 1) t() else t().drop(n-1)
+  }
 
   def takeWhile(p: A => Boolean): Stream[A] = sys.error("todo")
 
