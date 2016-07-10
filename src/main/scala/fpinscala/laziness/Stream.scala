@@ -36,7 +36,10 @@ trait Stream[+A] {
     case Cons(h, t) => if(p(h())) cons[A](h(), t().takeWhile(p)) else Empty
   }
 
-  def forAll(p: A => Boolean): Boolean = sys.error("todo")
+  def forAll(p: A => Boolean): Boolean = this match {
+    case Empty => true
+    case Cons(h, t) => if(p(h())) t().forAll(p) else false
+  }
 
   def headOption: Option[A] = sys.error("todo")
 

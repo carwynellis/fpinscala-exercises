@@ -19,6 +19,14 @@ class StreamTest extends FunSuite with Matchers {
   }
 
   test("takeWhile should return all elements until the predicate is false") {
-    stream.takeWhile(i => i < 3).toList should be(List(1,2))
+    stream.takeWhile(_ < 3).toList should be(List(1,2))
+  }
+
+  test("forAll should return true where the predicate applies to all elements") {
+    stream.forAll(_ < 10) should be(true)
+  }
+
+  test("forAll should return false where the predicate does not apply to all elements") {
+    stream.forAll(_ < 3) should be(false)
   }
 }
