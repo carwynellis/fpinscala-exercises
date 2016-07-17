@@ -18,7 +18,7 @@ trait Stream[+A] {
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
 
-  def toList: List[A] = this.foldRight(List.empty[A])((elem, acc) => elem :: acc)
+  def toList: List[A] = foldRight(List.empty[A])((elem, acc) => elem :: acc)
 
   def take(n: Int): Stream[A] = this match {
     case Empty => Empty
@@ -36,17 +36,17 @@ trait Stream[+A] {
     case Cons(h, t) => if(p(h())) cons[A](h(), t().takeWhile(p)) else Empty
   }
 
-  def takeWhileFoldR(p: A => Boolean): Stream[A] = ???
+  def takeWhileFoldR(p: A => Boolean): Stream[A] =
+    foldRight[Stream[A]](Empty)((a,b) => if(p(a)) cons(a, b) else Empty )
 
-  def forAll(p: A => Boolean): Boolean = this match {
+  @annotation.tailrec
+  final def forAll(p: A => Boolean): Boolean = this match {
     case Empty => true
     case Cons(h, t) => if(p(h())) t().forAll(p) else false
   }
 
   def forAllFoldR(p: A => Boolean): Boolean =
     foldRight(true)((a,b) => p(a) && b)
-
-
 
   def headOption: Option[A] = sys.error("todo")
 
