@@ -44,7 +44,7 @@ trait Stream[+A] {
   }
 
   def forAllFoldR(p: A => Boolean): Boolean =
-    this.foldRight(true)((a,b) => p(a) && b)
+    foldRight(true)((a,b) => p(a) && b)
 
 
 
