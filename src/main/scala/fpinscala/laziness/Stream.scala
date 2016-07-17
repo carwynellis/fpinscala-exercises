@@ -36,10 +36,17 @@ trait Stream[+A] {
     case Cons(h, t) => if(p(h())) cons[A](h(), t().takeWhile(p)) else Empty
   }
 
+  def takeWhileFoldR(p: A => Boolean): Stream[A] = ???
+
   def forAll(p: A => Boolean): Boolean = this match {
     case Empty => true
     case Cons(h, t) => if(p(h())) t().forAll(p) else false
   }
+
+  def forAllFoldR(p: A => Boolean): Boolean =
+    this.foldRight(true)((a,b) => p(a) && b)
+
+
 
   def headOption: Option[A] = sys.error("todo")
 

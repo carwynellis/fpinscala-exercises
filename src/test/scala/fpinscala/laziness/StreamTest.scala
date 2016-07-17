@@ -29,4 +29,16 @@ class StreamTest extends FunSuite with Matchers {
   test("forAll should return false where the predicate does not apply to all elements") {
     stream.forAll(_ < 3) should be(false)
   }
+
+  test("forAllFoldR should return true where the predicate applies to all elements") {
+    stream.forAllFoldR(_ < 10) should be(true)
+  }
+
+  test("forAllFoldR should return false where the predicate does not apply to all elements") {
+    stream.forAllFoldR(_ < 3) should be(false)
+  }
+
+  test("takeWhileFoldR should return all elements until the predicate is false") {
+    stream.takeWhileFoldR(_ < 3).toList should be(List(1,2))
+  }
 }
