@@ -41,4 +41,13 @@ class StreamTest extends FunSuite with Matchers {
   test("takeWhileFoldR should return all elements until the predicate is false") {
     stream.takeWhileFoldR(_ < 3).toList should be(List(1,2))
   }
+
+  test("headOption should return a Some for a stream with a least one value") {
+    stream.headOption should be(Some(1))
+  }
+
+  test("headOption should return a None for an empty stream") {
+    val empty = Stream()
+    empty.headOption should be(None)
+  }
 }
