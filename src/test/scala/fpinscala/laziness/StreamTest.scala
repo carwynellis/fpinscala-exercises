@@ -50,4 +50,21 @@ class StreamTest extends FunSuite with Matchers {
     val empty = Stream()
     empty.headOption should be(None)
   }
+
+  test("map returns a new stream with values modified by the specified mapping function") {
+    stream.map(i => i + 1).toList should be(List(2,3,4))
+  }
+
+  test("filter returns a stream containing only those elements satisfying the predicate function") {
+    stream.filter(_ < 3).toList should be(List(1,2))
+  }
+
+  test("append returns a new stream composed of the current and specified streams combined") {
+    val secondStream = Stream(4,5,6)
+    stream.append(secondStream).toList should be(List(1,2,3,4,5,6))
+  }
+
+  test("flatMap returns a new stream of values modified by the specified function") {
+    stream.flatMap(i => Stream(i + 1)).toList should be(List(2,3,4))
+  }
 }

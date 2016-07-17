@@ -3,14 +3,19 @@ package fpinscala.laziness
 import Stream._
 trait Stream[+A] {
 
-  def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
+  // The arrow `=>` in front of the argument type `B` means that the function `f`
+  // takes its second argument by name and may choose not to evaluate it.
+  def foldRight[B](z: => B)(f: (A, => B) => B): B =
     this match {
-      case Cons(h,t) => f(h(), t().foldRight(z)(f)) // If `f` doesn't evaluate its second argument, the recursion never occurs.
+      // If `f` doesn't evaluate its second argument, the recursion never occurs.
+      case Cons(h,t) => f(h(), t().foldRight(z)(f))
       case _ => z
     }
 
-  def exists(p: A => Boolean): Boolean = 
-    foldRight(false)((a, b) => p(a) || b) // Here `b` is the unevaluated recursive step that folds the tail of the stream. If `p(a)` returns `true`, `b` will never be evaluated and the computation terminates early.
+  def exists(p: A => Boolean): Boolean =
+    // Here `b` is the unevaluated recursive step that folds the tail of the stream.
+    // If `p(a)` returns `true`, `b` will never be evaluated and the computation terminates early.
+    foldRight(false)((a, b) => p(a) || b)
 
   @annotation.tailrec
   final def find(f: A => Boolean): Option[A] = this match {
@@ -53,6 +58,18 @@ trait Stream[+A] {
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
+  def map[B](f: A => B): Stream[B] =
+    foldRight[Stream[B]](Empty)((a,b) => cons(f(a), b))
+
+  def filter(p: A => Boolean): Stream[A] =
+    foldRight[Stream[A]](Empty)((a,b) => if (p(a)) cons(a,b) else b)
+
+  // Since a stream is either a cons or Empty need to modify type bounds to allow super classes.
+  def append[S >: A](s: Stream[S]): Stream[S] =
+    foldRight(s)((a, b) => cons(a,b))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight[Stream[B]](Empty)((a,b) => f(a).append(b))
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
