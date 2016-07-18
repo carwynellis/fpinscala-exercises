@@ -71,4 +71,8 @@ class StreamTest extends FunSuite with Matchers {
   test("constant returns an infinite stream of the specified element") {
     Stream.constant("foo").take(3).toList should be(List("foo", "foo", "foo"))
   }
+
+  test("from returns an infinite stream of integers increasing by 1 at a time") {
+    Stream.from(1).take(5).toList should be(List(1,2,3,4,5))
+  }
 }
