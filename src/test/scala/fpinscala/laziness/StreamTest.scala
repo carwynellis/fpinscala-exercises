@@ -67,4 +67,8 @@ class StreamTest extends FunSuite with Matchers {
   test("flatMap returns a new stream of values modified by the specified function") {
     stream.flatMap(i => Stream(i + 1)).toList should be(List(2,3,4))
   }
+
+  test("constant returns an infinite stream of the specified element") {
+    Stream.constant("foo").take(3).toList should be(List("foo", "foo", "foo"))
+  }
 }
