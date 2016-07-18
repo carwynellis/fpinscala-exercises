@@ -96,5 +96,7 @@ object Stream {
 
   def from(n: Int): Stream[Int] = Stream.cons(n, from(n+1))
 
+  def fibs(a: Int = 0, b: Int = 1): Stream[Int] = Stream.cons(a, fibs(b, a+b))
+
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = sys.error("todo")
 }

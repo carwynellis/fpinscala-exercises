@@ -75,4 +75,8 @@ class StreamTest extends FunSuite with Matchers {
   test("from returns an infinite stream of integers increasing by 1 at a time") {
     Stream.from(1).take(5).toList should be(List(1,2,3,4,5))
   }
+
+  test("fibs returns an infinite stream of fibonacci numbers") {
+    Stream.fibs().take(7).toList should be(List(0, 1, 1, 2, 3, 5, 8))
+  }
 }
