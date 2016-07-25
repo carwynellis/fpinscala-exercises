@@ -76,11 +76,28 @@ class StreamTest extends FunSuite with Matchers {
     Stream.from(1).take(5).toList should be(List(1,2,3,4,5))
   }
 
-  test("fibs returns an infinite stream of fibonacci numbers") {
+  test("fibs returns a stream of fibonacci numbers") {
     Stream.fibs().take(7).toList should be(List(0, 1, 1, 2, 3, 5, 8))
   }
 
   test("unfold returns a new stream generated using the specified state and next state function") {
     Stream.unfold[Int,Int](0)(s => Some(s+1, s+1)).take(3).toList should be(List(1,2,3))
   }
+
+  test("constantUsingUnfold returns an infinite stream of the specified element") {
+    Stream.constantUsingUnfold(1).take(3).toList should be(List(1,1,1))
+  }
+
+  test("onesUsingUnfold returns an infinite stream of ones") {
+    Stream.onesUsingUnfold.take(3).toList should be(List(1,1,1))
+  }
+
+  test("fromUsingUnfold returns an infinite stream of integers increasing by 1 at a time") {
+    Stream.fromUsingUnfold(1).take(5).toList should be(List(1,2,3,4,5))
+  }
+
+  test("fibsUsingUnfold returns a stream of fibonacci numbers") {
+    Stream.fibsUsingUnfold().take(7).toList should be(List(0, 1, 1, 2, 3, 5, 8))
+  }
+
 }
