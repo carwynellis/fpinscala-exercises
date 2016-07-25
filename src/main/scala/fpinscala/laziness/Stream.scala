@@ -72,6 +72,15 @@ trait Stream[+A] {
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight[Stream[B]](Empty)((a,b) => f(a).append(b))
 
+  // Stubbed methods for Exercise 5.13
+  def mapUsingUnfold[B](f: A => B): Stream[B] = ???
+  def takeUsingUnfold(n: Int): Stream[A] = ???
+  def takeWhileUsingUnfold(p: A => Boolean): Stream[A] = ???
+  def zipWith[S >: A, B](s: Stream[S])(f: (A,A) => B): Stream[B] = ???
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = ???
+
+
+
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
 case object Empty extends Stream[Nothing]
