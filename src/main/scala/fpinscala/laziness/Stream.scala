@@ -72,12 +72,34 @@ trait Stream[+A] {
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight[Stream[B]](Empty)((a,b) => f(a).append(b))
 
-  // Stubbed methods for Exercise 5.13
-  def mapUsingUnfold[B](f: A => B): Stream[B] = ???
-  def takeUsingUnfold(n: Int): Stream[A] = ???
-  def takeWhileUsingUnfold(p: A => Boolean): Stream[A] = ???
-  def zipWith[S >: A, B](s: Stream[S])(f: (A,A) => B): Stream[B] = ???
-  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = ???
+  // Solutions using unfold for Exercise 5.13
+  def mapUsingUnfold[B](f: A => B): Stream[B] = unfold(this) {
+    case Cons(h,t) => Some((f(h()), t()))
+    case Empty => None
+  }
+
+  def takeUsingUnfold(n: Int): Stream[A] = unfold((n, this)) {
+    case (c, Cons(h,t)) if c > 0 => Some(h(), (c - 1, t()))
+    case _ => None
+  }
+
+  def takeWhileUsingUnfold(p: A => Boolean): Stream[A] = unfold(this) {
+    case Cons(h,t) if p(h()) => Some(h(), t())
+    case _ => None
+  }
+
+  def zipWith[S >: A, B](s: Stream[S])(f: (A,S) => B): Stream[B] = unfold(this, s) {
+    case (Cons(a,b), Cons(x,y)) => Some( (f(a(), x()), (b(), y())) )
+    case _ => None
+  }
+
+  // TODO - Urgh - parens hell :(
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = unfold(this, s2) {
+    case (Cons(a,b), Cons(x,y)) => Some( (Some(a()), Some(x())), (b(), y())   )
+    case (Cons(a,b), _        ) => Some( (Some(a()),  None),     (b(), Empty) )
+    case (_,         Cons(x,y)) => Some( (None, Some(x())),      (Empty, y()) )
+    case (Empty, Empty)         => None
+  }
 
 
 
