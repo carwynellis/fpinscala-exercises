@@ -101,9 +101,19 @@ trait Stream[+A] {
     case (Empty, Empty)         => None
   }
 
+  def startsWith[B](s: Stream[B]): Boolean = {
+    def loop(startStream: Stream[B], thisStream: Stream[A]): Boolean = (startStream, thisStream) match {
+      case (Cons(a,b), Cons(x,y)) if a() == x() => loop(b(), y())
+      case (Cons(a,b), Cons(x,y)) if a() != x() => false
+      // If we exhaust the stream passed in then it must be a match
+      case (Empty, _) => true
+      // Otherwise 'this' stream was exhaused first so cannot start with the stream passed in
+      case _ => false
+    }
 
+    loop(s, this)
+  }
 
-  def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]

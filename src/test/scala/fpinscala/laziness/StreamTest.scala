@@ -120,4 +120,12 @@ class StreamTest extends FunSuite with Matchers {
     stream.zipAll(stream).toList should be(List((Some(1), Some(1)), (Some(2), Some(2)), (Some(3), Some(3))))
   }
 
+  test("startsWith returns true for a matching stream prefix") {
+    stream.startsWith(Stream(1,2)) should be(true)
+  }
+
+  test("startsWith returns false for a non-matching stream prefix") {
+    stream.startsWith(Stream(5,6)) should be(false)
+  }
+
 }
