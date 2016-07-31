@@ -128,4 +128,8 @@ class StreamTest extends FunSuite with Matchers {
     stream.startsWith(Stream(5,6)) should be(false)
   }
 
+  test("tails should generate all possible suffixes of a stream") {
+    stream.tails.toList.map(_.toList) should be(List(List(1,2,3), List(2,3), List(3), List()))
+  }
+
 }

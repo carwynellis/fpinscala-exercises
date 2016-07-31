@@ -107,11 +107,19 @@ trait Stream[+A] {
       case (Cons(a,b), Cons(x,y)) if a() != x() => false
       // If we exhaust the stream passed in then it must be a match
       case (Empty, _) => true
-      // Otherwise 'this' stream was exhaused first so cannot start with the stream passed in
+      // Otherwise 'this' stream was exhausted first so cannot start with the stream passed in
       case _ => false
     }
 
     loop(s, this)
+  }
+
+  // Use a tuple to carry a flag indicating when we've reached the end of the stream so we can terminate the unfold.
+  // This allows the empty stream to be emitted whilst ensuring the unfold terminates.
+  def tails: Stream[Stream[A]] = unfold((false, this)) {
+    case (false, Cons(h, t)) => Some(cons(h(), t()), (false, t()))
+    case (false, Empty)      => Some(Stream(), (true, Empty))
+    case (true, _)           => None
   }
 
 }
