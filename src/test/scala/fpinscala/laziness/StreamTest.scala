@@ -132,4 +132,8 @@ class StreamTest extends FunSuite with Matchers {
     stream.tails.toList.map(_.toList) should be(List(List(1,2,3), List(2,3), List(3), List()))
   }
 
+  test("scanRight returns a sequence of intermediate results") {
+    stream.scanRight(0)(_ + _).toList should be(List(6, 5, 3, 0))
+  }
+
 }
