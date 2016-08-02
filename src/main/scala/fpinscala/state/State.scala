@@ -30,7 +30,11 @@ object RNG {
       (f(a), rng2)
     }
 
-  def nonNegativeInt(rng: RNG): (Int, RNG) = ???
+  def nonNegativeInt(rng: RNG): (Int, RNG) = rng.nextInt match {
+    case (i, r) if i >= 0 => (i, r)
+    case (i, r) if i > Int.MinValue => (-i, r)
+    case (i, r) if i == Int.MinValue => nonNegativeInt(r)
+  }
 
   def double(rng: RNG): (Double, RNG) = ???
 
