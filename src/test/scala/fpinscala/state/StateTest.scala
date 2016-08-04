@@ -32,4 +32,24 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     RNG.nonNegativeInt(mockRNG) should be(10, mockRNG)
   }
 
+  test("double returns a double less than 1 when RNG.nextInt returns Int.MaxValue") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt).thenReturn((Int.MaxValue, mockRNG))
+
+    val (result, _) = RNG.double(mockRNG)
+
+    result should be < 1.0
+  }
+
+  test("double returns zero when RNG.nextInt returns 0") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    val (result, _) = RNG.double(mockRNG)
+
+    result should be(0)
+  }
+
 }
