@@ -40,11 +40,25 @@ object RNG {
     case (i, r) => (i.toDouble / (Int.MaxValue.toDouble + 1), r)
   }
 
-  def intDouble(rng: RNG): ((Int,Double), RNG) = ???
+  def intDouble(rng: RNG): ((Int,Double), RNG) =
+    rng.nextInt match {
+      case (i: Int, r1: RNG) => double(r1) match {
+        case (d: Double, r2: RNG) => ((i,d), r2)
+      }
+    }
 
-  def doubleInt(rng: RNG): ((Double,Int), RNG) = ???
 
-  def double3(rng: RNG): ((Double,Double,Double), RNG) = ???
+  def doubleInt(rng: RNG): ((Double,Int), RNG) = intDouble(rng) match {
+    case ((i: Int, d: Double), r: RNG) => ((d,i), r)
+  }
+
+  def double3(rng: RNG): ((Double,Double,Double), RNG) = double(rng) match {
+    case (d1: Double, r1: RNG) => double(r1) match {
+      case (d2: Double, r2: RNG) => double(r2) match {
+        case (d3: Double, r3: RNG) => ((d1,d2,d3), r3)
+      }
+    }
+  }
 
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
 

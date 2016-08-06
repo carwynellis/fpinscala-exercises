@@ -52,4 +52,45 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     result should be(0)
   }
 
+  test("intDouble returns a tuple of (int, double)") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+      .thenReturn((2, mockRNG))
+
+    val (result, _) = RNG.intDouble(mockRNG)
+
+    result should be(1, 2.0 / (Int.MaxValue.toDouble + 1.0))
+  }
+
+  test("doubleInt returns a tuple of (int, double)") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+      .thenReturn((2, mockRNG))
+
+    val (result, _) = RNG.doubleInt(mockRNG)
+
+    result should be(2.0 / (Int.MaxValue.toDouble + 1.0), 1)
+  }
+
+  test("double3 returns a tuple of three doubles") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+      .thenReturn((2, mockRNG))
+      .thenReturn((3, mockRNG))
+
+    val (result, _) = RNG.double3(mockRNG)
+
+    result should be(
+      1.0 / (Int.MaxValue.toDouble + 1.0),
+      2.0 / (Int.MaxValue.toDouble + 1.0),
+      3.0 / (Int.MaxValue.toDouble + 1.0)
+    )
+  }
+
 }
