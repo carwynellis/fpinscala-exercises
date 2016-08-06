@@ -1,5 +1,6 @@
 package fpinscala.state
 
+import fpinscala.state.RNG.Rand
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{FunSuite, Matchers}
@@ -104,6 +105,17 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     val (result, _) = RNG.ints(3)(mockRNG)
 
     result should be(List(1,2,3))
+  }
+
+  test("doubleUsingMap returns expected result") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+
+    val result: Rand[Double] = RNG.doubleUsingMap(mockRNG)
+
+    result(mockRNG)._1 should be(1.0 / (Int.MaxValue.toDouble + 1.0))
   }
 
 }
