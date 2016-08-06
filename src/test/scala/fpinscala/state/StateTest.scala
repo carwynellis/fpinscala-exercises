@@ -93,4 +93,17 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     )
   }
 
+  test("ints returns the specified number of random ints") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((3, mockRNG))
+      .thenReturn((2, mockRNG))
+      .thenReturn((1, mockRNG))
+
+    val (result, _) = RNG.ints(3)(mockRNG)
+
+    result should be(List(1,2,3))
+  }
+
 }
