@@ -113,9 +113,21 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     when(mockRNG.nextInt)
       .thenReturn((1, mockRNG))
 
-    val result: Rand[Double] = RNG.doubleUsingMap(mockRNG)
+    val res = RNG.doubleUsingMap(mockRNG)
 
-    result(mockRNG)._1 should be(1.0 / (Int.MaxValue.toDouble + 1.0))
+    RNG.map(res){ r =>
+      r should be(1.0 / (Int.MaxValue.toDouble + 1.0))
+    }
+  }
+
+  test("map2 can be used to combine two actions") {
+    val mockRNG = mock[RNG]
+
+    val res = RNG.map(RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _))(i => i)
+
+    RNG.map(res){ r =>
+      r should be(2)
+    }
   }
 
 }
