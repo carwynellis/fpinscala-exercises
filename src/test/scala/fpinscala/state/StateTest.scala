@@ -113,21 +113,17 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     when(mockRNG.nextInt)
       .thenReturn((1, mockRNG))
 
-    val res = RNG.doubleUsingMap(mockRNG)
+    val (result, _) = RNG.doubleUsingMap(mockRNG)(mockRNG)
 
-    RNG.map(res) { r =>
-      r should be(1.0 / (Int.MaxValue.toDouble + 1.0))
-    }
+    result should be(1.0 / (Int.MaxValue.toDouble + 1.0))
   }
 
   test("map2 can be used to combine two actions") {
     val mockRNG = mock[RNG]
 
-    val res = RNG.map(RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _))(i => i)
+    val (result, _) = RNG.map(RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _))(i => i)(mockRNG)
 
-    RNG.map(res) { r =>
-      r should be(2)
-    }
+    result should be(2)
   }
 
   test("sequence combines a list of RNG transitions") {
@@ -135,11 +131,33 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
 
     val transitionList = List(RNG.unit(1), RNG.unit(2), RNG.unit(3))
 
-    val res = RNG.sequence(transitionList)
+    val (result, _) = RNG.sequence(transitionList)(mockRNG)
 
-    RNG.map(res) { r =>
-      r should be(List(1,2,3))
+    result should be(List(1,2,3))
+  }
+
+  test("flatmap returns a new state correctly") {
+    val mockRNG = mock[RNG]
+
+    val res = RNG.flatMap(RNG.unit(1)) { a =>
+      RNG.unit(a + 1)
     }
+
+    val (result, _) = res(mockRNG)
+
+    result should be(2)
+  }
+
+  test("nonNegativeLessThan returns an int less than the specified value") {
+    val mockRNG = mock[RNG]
+
+    when(mockRNG.nextInt)
+      .thenReturn((Int.MaxValue, mockRNG))
+      .thenReturn((1, mockRNG))
+
+    val (result, _) = RNG.nonNegativeLessThan(10)(mockRNG)
+
+    result should be(1)
   }
 
 }

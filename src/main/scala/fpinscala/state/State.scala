@@ -90,7 +90,21 @@ object RNG {
       }
     }
 
-  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
+  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = rng => {
+    val (fVal, fRNG) = f(rng)
+    g(fVal)(fRNG)
+  }
+
+  val positiveInt: Rand[Int] = nonNegativeInt(_)
+
+  def nonNegativeLessThan(n: Int): Rand[Int] =
+    flatMap(positiveInt) { i =>
+      val mod = i % n
+      println(s"i: $i mod: $mod")
+      if ( i + (n - 1) - mod >= 0 ) unit(mod)
+      else nonNegativeLessThan(n)
+    }
+
 }
 
 case class State[S,+A](run: S => (A, S)) {
