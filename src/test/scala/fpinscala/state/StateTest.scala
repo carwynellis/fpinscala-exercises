@@ -115,7 +115,7 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
 
     val res = RNG.doubleUsingMap(mockRNG)
 
-    RNG.map(res){ r =>
+    RNG.map(res) { r =>
       r should be(1.0 / (Int.MaxValue.toDouble + 1.0))
     }
   }
@@ -125,8 +125,20 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
 
     val res = RNG.map(RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _))(i => i)
 
-    RNG.map(res){ r =>
+    RNG.map(res) { r =>
       r should be(2)
+    }
+  }
+
+  test("sequence combines a list of RNG transitions") {
+    val mockRNG = mock[RNG]
+
+    val transitionList = List(RNG.unit(1), RNG.unit(2), RNG.unit(3))
+
+    val res = RNG.sequence(transitionList)
+
+    RNG.map(res) { r =>
+      r should be(List(1,2,3))
     }
   }
 
