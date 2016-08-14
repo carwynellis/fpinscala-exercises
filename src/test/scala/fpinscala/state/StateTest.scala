@@ -121,7 +121,7 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
   test("map2 can be used to combine two actions") {
     val mockRNG = mock[RNG]
 
-    val (result, _) = RNG.map(RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _))(i => i)(mockRNG)
+    val (result, _) = RNG.map2(RNG.unit(1), RNG.unit(1))(_ + _)(mockRNG)
 
     result should be(2)
   }
@@ -158,6 +158,23 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     val (result, _) = RNG.nonNegativeLessThan(10)(mockRNG)
 
     result should be(1)
+  }
+
+  test("mapUsingFlatMap produces a new rng with a value modified by the specified function") {
+    val mockRNG = mock[RNG]
+
+    val (result, _) = RNG.mapUsingFlatMap(RNG.unit(1))( _ + 1 )(mockRNG)
+
+    result should be(2)
+
+  }
+
+  test("map2UsingFlatMap can be used to combine two actions") {
+    val mockRNG = mock[RNG]
+
+    val (result, _) = RNG.map2UsingFlatMap(RNG.unit(1), RNG.unit(1))(_ + _)(mockRNG)
+
+    result should be(2)
   }
 
 }
