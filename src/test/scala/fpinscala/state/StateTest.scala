@@ -177,4 +177,52 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     result should be(2)
   }
 
+  test("State.unit returns a new state containing the specififed value") {
+    val mockRNG = mock[RNG]
+
+    val (result, _) = State.unit[RNG, Int](1).run(mockRNG)
+
+    result should be(1)
+  }
+
+  test("State.flatMap returns a new state with a value modified by the specified function") {
+    val mockRNG = mock[RNG]
+
+    val initialState = State.unit[RNG, Int](1)
+
+    val (result, _) = initialState.flatMap[Int] { a =>
+      State.unit(a + 1)
+    }.run(mockRNG)
+
+    result should be(2)
+  }
+
+  test("State.map retruns a new state with the value modified by the specified function") {
+    val mockRNG = mock[RNG]
+
+    val initialState = State.unit[RNG, Int](1)
+
+    val (result, _) = initialState.map[Int] { _ + 1 }.run(mockRNG)
+
+    result should be(2)
+  }
+
+  test("State.map2 can be used to combine two actions") {
+    val mockRNG = mock[RNG]
+
+    val (result, _) = State.unit[RNG, Int](1).map2(State.unit[RNG, Int](2))(_ + _).run(mockRNG)
+
+    result should be(3)
+  }
+
+  test("State.sequence combines a list of actions") {
+    val mockRNG = mock[RNG]
+
+    val transitionList = List(State.unit[RNG, Int](1), State.unit[RNG, Int](2), State.unit[RNG, Int](3))
+
+    val (result, _) = State.sequence(transitionList).run(mockRNG)
+
+    result should be(List(1,2,3))
+  }
+
 }
