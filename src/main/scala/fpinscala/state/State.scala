@@ -142,21 +142,68 @@ object State {
 
   type Rand[A] = State[RNG, A]
 
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+  // Slightly more verbose implementation in an attempt to clarify how this works.
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
+
+    val finalState: State[Machine, List[Unit]] = sequence(handleInputs(inputs))
+
+    // Convert the State[Machine, List[Unit]] into a State[Machine, (Int, Int)]
+    // where the tuple contains the final candies and coins values.
+    finalState flatMap {
+      // Ignore the List[Unit] since it contains nothing useful, then call get
+      // so we can access the machine instance that contains the state we're
+      // interested in.
+      _ => get
+    } map { machine =>
+      // Return a tuple containing the count of candies and coins.
+      (machine.candies, machine.coins)
+    }
+  }
+
+  // More concise implementation using for comprehension.
+  def simulateMachineWithForComprehension(inputs: List[Input]): State[Machine, (Int,Int)] = for {
+    _ <- sequence(handleInputs(inputs))
+    m <- get
+  } yield (m.candies, m.coins)
+
+  // Map over the inputs and update the state according to the input and the
+  // current state of the machine using modify.
+  // Returns a list of state transitions which can then be sequenced to
+  // produce a final state, which is the result of an initial machine state and
+  // the application of a number of inputs.
+  def handleInputs(inputs: List[Input]): List[State[Machine, Unit]] =
+    inputs map { i =>
+      modify[Machine] { s: Machine =>
+        (i, s) match {
+          // Machine ignores Input if candies 0
+          case (input@_, machine@Machine(_, 0, _)) =>
+            machine
+          // Inserting a coin into a locked machine unlocks it if there is any candy left
+          case (Coin, machine@Machine(true, _, coins)) => machine.copy(locked = false, coins = coins + 1)
+          // Turning the knob on an unlocked machine should dispense a candy and lock it again
+          case (Turn, machine@Machine(false, candies, _)) => machine.copy(locked = true, candies = candies - 1)
+          // Turning the knob on a locked machine does nothing
+          case (Turn, machine@Machine(true, _, _)) => machine
+          // Inserting a coin into a locked machine does nothing
+          case (Coin, machine@Machine(false, _, _)) => machine
+        }
+      }
+    }
 
   def unit[S,A](a: A): State[S, A] = State(s => (a, s))
 
-  def sequence[S,A](fs: List[State[S, A]]): State[S, List[A]] =
+  def sequence[S,A](fs: List[State[S, A]]): State[S, List[A]] = {
     fs.foldRight(State.unit[S, List[A]](List.empty[A])) { (e, acc) =>
       e.map2(acc) { (a, b) => a :: b }
     }
+  }
 
   def modify[S](f: S => S): State[S, Unit] = for {
-    s <- get // Gets the current state and assigns it to `s`.
-    _ <- set(f(s)) // Sets the new state to `f` applied to `s`.
+    s <- get
+    _ <- set(f(s))
   } yield ()
 
-  def get[S]: State[S, S] = State(s => (s, s))
+  private def get[S]: State[S, S] = State(s => (s, s))
+  private def set[S](s: S): State[S, Unit] = State(_ => ((), s))
 
-  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
 }

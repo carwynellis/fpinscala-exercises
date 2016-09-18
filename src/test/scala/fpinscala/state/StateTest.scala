@@ -197,7 +197,7 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     result should be(2)
   }
 
-  test("State.map retruns a new state with the value modified by the specified function") {
+  test("State.map returns a new state with the value modified by the specified function") {
     val mockRNG = mock[RNG]
 
     val initialState = State.unit[RNG, Int](1)
@@ -223,6 +223,79 @@ class StateTest extends FunSuite with Matchers with MockitoSugar {
     val (result, _) = State.sequence(transitionList).run(mockRNG)
 
     result should be(List(1,2,3))
+  }
+
+  test("machine that is out of candy ignores all inputs") {
+    val machine = Machine(locked = true, candies = 0, coins = 0)
+
+    // Attempt to unlock machine and retrieve a candy
+    val inputs = List(Coin, Turn)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((0,0), machine)
+  }
+
+  test("inserting a coin into a locked machine unlocks it if candies remain") {
+    val machine = Machine(locked = true, candies = 10, coins = 0)
+
+    val inputs = List(Coin)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((10,1), Machine(false, 10, 1))
+  }
+
+  test("turning the knob on an unlocked machine will cause it to dispense candy and become locked") {
+    val machine = Machine(locked = false, candies = 10, coins = 1)
+
+    val inputs = List(Turn)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((9,1), Machine(true, 9, 1))
+  }
+
+  test("turning the knob on a locked machine does nothing") {
+    val machine = Machine(locked = true, candies = 10, coins = 1)
+
+    val inputs = List(Turn)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((10,1), machine)
+  }
+
+  test("inserting a coin into an unlocked machine does nothing") {
+    val machine = Machine(locked = false, candies = 10, coins = 1)
+
+    val inputs = List(Coin)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((10,1), machine)
+  }
+
+  test("simulateMachine returns expected final state for sequence of inputs") {
+    val machine = Machine(locked = true, candies = 2, coins = 0)
+
+    // Run three coin, turn sequences which should result in an empty machine with 2 coins
+    val inputs = List(Coin, Turn, Coin, Turn, Coin, Turn)
+
+    val result = State.simulateMachine(inputs).run(machine)
+
+    result should be((0,2), Machine(locked = true, candies = 0, coins = 2))
+  }
+
+  test("simulateMachineWithForComprehension returns expected final state") {
+    val machine = Machine(locked = true, candies = 2, coins = 0)
+
+    // Run three coin, turn sequences which should result in an empty machine with 2 coins
+    val inputs = List(Coin, Turn, Coin, Turn, Coin, Turn)
+
+    val result = State.simulateMachineWithForComprehension(inputs).run(machine)
+
+    result should be((0,2), Machine(locked = true, candies = 0, coins = 2))
   }
 
 }
