@@ -1,7 +1,9 @@
 package fpinscala.parallelism
 
 import java.util.concurrent._
+
 import language.implicitConversions
+import scala.concurrent.duration.Duration
 
 object Par {
   type Par[A] = ExecutorService => Future[A]
@@ -19,6 +21,52 @@ object Par {
     def get(timeout: Long, units: TimeUnit) = get 
     def isCancelled = false 
     def cancel(evenIfRunning: Boolean): Boolean = false 
+  }
+
+  // Future implementation specific to map2 that respects timeouts
+  // Derived from the provided solution which runs each future sequentially.
+  private case class TimeoutFuture[A,B,C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
+
+    @volatile
+    private var result: Option[C] = None
+
+    override def isCancelled: Boolean = a.isCancelled || b.isCancelled
+
+    override def get(): C = getResult(Long.MaxValue, TimeUnit.MILLISECONDS)
+
+    override def get(timeout: Long, unit: TimeUnit): C = getResult(timeout, unit)
+
+    override def cancel(mayInterruptIfRunning: Boolean): Boolean =
+      a.cancel(mayInterruptIfRunning) || b.cancel(mayInterruptIfRunning)
+
+    override def isDone: Boolean = result.isDefined
+
+    private def getResult(timeout: Long, unit: TimeUnit): C = result match {
+      case Some(r) => r
+      case None => run(timeout, unit)
+    }
+
+    // Runs the futures sequentially. Gives the first future the entire timeout
+    // duration. The second future receives the remaining time.
+    private def run(timeout: Long, unit: TimeUnit): C = {
+
+      val timeoutNanos = Duration(timeout, unit).toNanos
+
+      val startTime = System.nanoTime()
+
+      val resultA = a.get(timeoutNanos, TimeUnit.NANOSECONDS)
+
+      val remainingTime = System.nanoTime() - startTime
+
+      val resultB = b.get(remainingTime, TimeUnit.NANOSECONDS)
+
+      val res = f(resultA, resultB)
+
+      result = Some(res)
+
+      res
+    }
+
   }
 
   // `map2` doesn't evaluate the call to `f` in a separate logical thread, in
