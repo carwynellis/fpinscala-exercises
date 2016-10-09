@@ -16,6 +16,10 @@ object Par {
   // cancelled. Its `get` method simply returns the value that we gave it.
   def unit[A](a: A): Par[A] = (es: ExecutorService) => UnitFuture(a)
 
+  def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
+
+  def asyncF[A,B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
+
   private case class UnitFuture[A](get: A) extends Future[A] {
     def isDone = true 
     def get(timeout: Long, units: TimeUnit) = get 
