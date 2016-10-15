@@ -103,6 +103,11 @@ object Par {
   def map[A,B](pa: Par[A])(f: A => B): Par[B] = 
     map2(pa, unit(()))((a,_) => f(a))
 
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
+    val fbs: List[Par[B]] = ps.map(asyncF(f))
+    sequence(fbs)
+  }
+
   def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
 
   // Fold over the input list, ps and accumulate the elements inside a

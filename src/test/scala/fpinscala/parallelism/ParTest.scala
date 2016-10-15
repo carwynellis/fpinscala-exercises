@@ -44,10 +44,19 @@ class ParTest extends AsyncFunSuite with Matchers {
 
 
   test("sequence takes a list of par, and returns a par of list") {
-    val parList: List[Par[Int]] = List.range(1, 5).map(Par.unit[Int])
+    val intList = List.range(1,5)
+    val parList: List[Par[Int]] = intList.map(Par.unit[Int])
 
     val result = Par.run(executorService)(Par.sequence(parList))
 
-    result.get should be(List.range(1, 5))
+    result.get should be(intList)
+  }
+
+  test("parMap returns input list modified by specified function") {
+    val intList = List.range(1,5)
+
+    val result = Par.run(executorService)(Par.parMap(intList)(_ + 1))
+
+    result.get should be(List.range(2,6))
   }
 }
