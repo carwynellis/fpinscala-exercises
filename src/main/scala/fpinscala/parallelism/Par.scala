@@ -110,6 +110,14 @@ object Par {
 
   def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
 
+  def parFilter[A](ps: List[A])(f: A => Boolean): Par[List[A]] = {
+    val res: Par[List[List[A]]] = parMap[A, List[A]](ps) { elem: A =>
+      if (f(elem)) List(elem)
+      else List.empty[A]
+    }
+    map(res)(_.flatten)
+  }
+
   // Fold over the input list, ps and accumulate the elements inside a
   // Par[List[A] - this is almost identical to the Option.sequence implemented
   // earlier.

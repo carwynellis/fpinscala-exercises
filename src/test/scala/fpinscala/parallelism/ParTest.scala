@@ -59,4 +59,10 @@ class ParTest extends AsyncFunSuite with Matchers {
 
     result.get should be(List.range(2,6))
   }
+
+  test("filter returns only list elements satisfying the predicate") {
+    val result = Par.run(executorService)(Par.parFilter(List.range(1,10))(_ <= 5))
+
+    result.get should be(List.range(1,6))
+  }
 }
