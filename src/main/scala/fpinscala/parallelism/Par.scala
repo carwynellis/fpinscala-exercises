@@ -29,16 +29,17 @@ object Par {
 
   // Future implementation specific to map2 that respects timeouts
   // Derived from the provided solution which runs each future sequentially.
-  private case class TimeoutFuture[A,B,C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
+  private case class Map2Futures[A,B,C](a: Future[A], b: Future[B], f: (A,B) => C) extends Future[C] {
 
     @volatile
     private var result: Option[C] = None
 
     override def isCancelled: Boolean = a.isCancelled || b.isCancelled
 
-    override def get(): C = getResult(Long.MaxValue, TimeUnit.MILLISECONDS)
+    override def get(): C = getResult(Long.MaxValue, TimeUnit.NANOSECONDS)
 
-    override def get(timeout: Long, unit: TimeUnit): C = getResult(timeout, unit)
+    override def get(timeout: Long, unit: TimeUnit): C =
+      getResult(timeout, unit)
 
     override def cancel(mayInterruptIfRunning: Boolean): Boolean =
       a.cancel(mayInterruptIfRunning) || b.cancel(mayInterruptIfRunning)
@@ -60,7 +61,9 @@ object Par {
 
       val resultA = a.get(timeoutNanos, TimeUnit.NANOSECONDS)
 
-      val remainingTime = System.nanoTime() - startTime
+      val stopTime = System.nanoTime()
+
+      val remainingTime = timeoutNanos - (stopTime - startTime)
 
       val resultB = b.get(remainingTime, TimeUnit.NANOSECONDS)
 
@@ -81,16 +84,7 @@ object Par {
     (es: ExecutorService) => {
       val af = a(es) 
       val bf = b(es)
-      // This implementation of `map2` does _not_ respect timeouts, and eagerly
-      // waits for the returned futures. This means that even if you have passed
-      // in "forked" arguments, using this map2 on them will make them wait. It
-      // simply passes the `ExecutorService` on to both `Par` values, waits for
-      // the results of the Futures `af` and `bf`, applies `f` to them, and
-      // wraps them in a `UnitFuture`. In order to respect timeouts, we'd need a
-      // new `Future` implementation that records the amount of time spent
-      // evaluating `af`, then subtracts that time from the available time
-      // allocated for evaluating `bf`.
-      UnitFuture(f(af.get, bf.get))
+      Map2Futures(af, bf, f)
     }
 
   // This is the simplest and most natural implementation of `fork`, but there
@@ -103,13 +97,21 @@ object Par {
   // later in the chapter.
   def fork[A](a: => Par[A]): Par[A] =
     es => es.submit(new Callable[A] {
-      def call = a(es).get
+      override def call = a(es).get
     })
 
   def map[A,B](pa: Par[A])(f: A => B): Par[B] = 
     map2(pa, unit(()))((a,_) => f(a))
 
   def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
+
+  // Fold over the input list, ps and accumulate the elements inside a
+  // Par[List[A] - this is almost identical to the Option.sequence implemented
+  // earlier.
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] =
+    ps.foldRight[Par[List[A]]](unit(List.empty[A])){ (elem, acc) =>
+      map2(elem, acc)(_ :: _)
+    }
 
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = 
     p(e).get == p2(e).get
