@@ -1,36 +1,26 @@
 package fpinscala.parallelism
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{ExecutorService, Executors}
 
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{AsyncFunSuite, Matchers}
 
-class NonblockingTest extends AsyncFunSuite with Matchers {
+class NonblockingTest extends AsyncFunSuite with Matchers with MockitoSugar {
 
-  private val es = Executors.newWorkStealingPool()
+  private val es: ExecutorService = Executors.newWorkStealingPool()
 
   test("run returns the result of the Par") {
-    val par = Nonblocking.Par.unit(1)
-
+    val par = Nonblocking.Par.map(Nonblocking.Par.unit(1)){ i => i }
     val result = Nonblocking.Par.run(es)(par)
-
     result should be(1)
   }
 
   test("run propagates exceptions thrown by Par") {
     // Setup a computation that should throw a div by zero exception.
-    val parException = Nonblocking.Par.map(Nonblocking.Par.unit(0)) { arg =>
-      println(s"Attempting to divide 1 by $arg")
-      try {
+    val parException = Nonblocking.Par.map(Nonblocking.Par.unit(0)) { _ =>
         1 / 0
-      }
-      catch {
-        case e: Exception =>
-          println(s"Caught exception: $e - ${e.printStackTrace()})")
-      }
     }
 
-    // TODO - The exception is swallowed in the other thread so we continue to
-    // block
     an[Exception] should be thrownBy Nonblocking.Par.run(es)(parException)
   }
 }

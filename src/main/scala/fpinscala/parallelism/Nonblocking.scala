@@ -1,13 +1,18 @@
 package fpinscala.parallelism
 
-import java.util.concurrent.{Callable, CountDownLatch, ExecutorService}
+import java.util.concurrent.{Callable, CountDownLatch, ExecutorService, Future}
 import java.util.concurrent.atomic.AtomicReference
+
 import language.implicitConversions
 
 object Nonblocking {
 
   trait Future[+A] {
-    private[parallelism] def apply(k: A => Unit): Unit
+    private[parallelism] def apply(
+      k: A => Unit,
+      // Error handler with rudimentary default implementation
+      eh: Exception => Unit = e => println(s"Caught exception: $e")
+    ): Unit
   }
 
   type Par[+A] = ExecutorService => Future[A]
@@ -16,38 +21,52 @@ object Nonblocking {
 
     def run[A](es: ExecutorService)(p: Par[A]): A = {
       // A mutable, threadsafe reference, to use for storing the result
-      val ref = new AtomicReference[A]
+      val ref = new AtomicReference[Either[Exception, A]]
       // A latch which, when decremented, implies that `ref` has the result
       val latch = new CountDownLatch(1)
 
-      // Asynchronously set the result, and decrement the latch
-      p(es) { result =>
-        ref.set(result)
+      // Asynchronously set the result, and decrement the latch.
+      p(es)(
+        { result =>
+        // When an exception is raised we won't even get here so block forever
+        ref.set(Right(result))
         latch.countDown()
-      }
+      },
+        { e: Exception =>
+          ref.set(Left(e))
+          latch.countDown()
+        }
+      )
 
       // Block until the `latch.countDown` is invoked asynchronously
       latch.await()
-      // Once we've passed the latch, we know `ref` has been set, and return its value
-      ref.get
+      // TODO - the IOMonad code depends on this implementation returning an
+      //        A so for now match on the either and return the value or throw
+      //        an exception. Would prefer to leave it to the caller to decide
+      //        whether an exception needed to be thrown.
+      ref.get match {
+        case Left(e)    => throw e
+        case Right(value) => value
+      }
     }
 
     def unit[A](a: A): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
+        def apply(cb: A => Unit, eh: Exception => Unit): Unit = {
           cb(a)
+        }
       }
 
     /** A non-strict version of `unit` */
     def delay[A](a: => A): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
+        def apply(cb: A => Unit, eh: Exception => Unit): Unit =
           cb(a)
       }
 
     def fork[A](a: => Par[A]): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
+        def apply(cb: A => Unit, eh: Exception => Unit): Unit =
           eval(es)(a(es)(cb))
       }
 
@@ -56,7 +75,7 @@ object Nonblocking {
      * This will come in handy in Chapter 13.
      */
     def async[A](f: (A => Unit) => Unit): Par[A] = es => new Future[A] {
-      def apply(k: A => Unit) = f(k)
+      def apply(k: A => Unit, eh: Exception => Unit) = f(k)
     }
 
     /**
@@ -69,7 +88,7 @@ object Nonblocking {
 
     def map2[A,B,C](p: Par[A], p2: Par[B])(f: (A,B) => C): Par[C] =
       es => new Future[C] {
-        def apply(cb: C => Unit): Unit = {
+        def apply(cb: C => Unit, eh: Exception => Unit): Unit = {
           var ar: Option[A] = None
           var br: Option[B] = None
           val combiner = Actor[Either[A,B]](es) {
@@ -88,8 +107,22 @@ object Nonblocking {
     // specialized version of `map`
     def map[A,B](p: Par[A])(f: A => B): Par[B] =
       es => new Future[B] {
-        def apply(cb: B => Unit): Unit =
-          p(es)(a => eval(es) { cb(f(a)) })
+        // cb is the function passed to the par in the run method
+        def apply(cb: B => Unit, eh: Exception => Unit): Unit = {
+          // We eval here so at this point we should start another thread
+          p(es)(a => eval(es) {
+            // Call the function and pass the result to the callback if no
+            // exceptions were thrown, otherwise pass the caught exception
+            // to the error handling callback.
+            try {
+              val result = f(a)
+              cb(result)
+            }
+            catch {
+              case e: Exception => eh(e)
+            }
+          })
+        }
       }
 
     def lazyUnit[A](a: => A): Par[A] =
@@ -134,7 +167,7 @@ object Nonblocking {
      */
     def choice[A](p: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
+        def apply(cb: A => Unit, eh: Exception => Unit): Unit =
           p(es) { b =>
             if (b) eval(es) { t(es)(cb) }
             else eval(es) { f(es)(cb) }
