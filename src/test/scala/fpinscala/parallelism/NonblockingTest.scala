@@ -123,4 +123,41 @@ class NonblockingTest extends AsyncFunSuite with Matchers with MockitoSugar {
 
     result should be(1)
   }
+
+  test("join flattens a par of par correctly") {
+    val innerPar = Nonblocking.Par.unit(1)
+    val outerPar = Nonblocking.Par.unit(innerPar)
+
+    val join = Nonblocking.Par.join(outerPar)
+
+    val result = Nonblocking.Par.run(es)(join)
+
+    result should be(1)
+  }
+
+  test("flatMapViaJoin produces expected result") {
+    val p = Nonblocking.Par.unit(true)
+
+    val f = { c: Boolean =>
+      if (c) Nonblocking.Par.unit(1)
+      else Nonblocking.Par.unit(0)
+    }
+
+    val makeChoice = Nonblocking.Par.flatMapViaJoin(p)(f)
+
+    val result = Nonblocking.Par.run(es)(makeChoice)
+
+    result should be(1)
+  }
+
+  test("joinViaFlatMap flattens a par of par correctly") {
+    val innerPar = Nonblocking.Par.unit(1)
+    val outerPar = Nonblocking.Par.unit(innerPar)
+
+    val join = Nonblocking.Par.joinViaFlatMap(outerPar)
+
+    val result = Nonblocking.Par.run(es)(join)
+
+    result should be(1)
+  }
 }
