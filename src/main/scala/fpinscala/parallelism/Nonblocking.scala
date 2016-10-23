@@ -149,8 +149,6 @@ object Nonblocking {
     def sequence[A](as: List[Par[A]]): Par[List[A]] =
       map(sequenceBalanced(as.toIndexedSeq))(_.toList)
 
-    // exercise answers
-
     /*
      * We can implement `choice` as a new primitive.
      *
@@ -186,17 +184,26 @@ object Nonblocking {
           }
       }
 
-    // see `Nonblocking.scala` answers file. This function is usually called something else!
     def chooser[A,B](p: Par[A])(f: A => Par[B]): Par[B] =
-      ???
-
-    def flatMap[A,B](p: Par[A])(f: A => Par[B]): Par[B] =
-      ???
+      es => new Future[B] {
+        def apply(cb: B => Unit, eh: Exception => Unit): Unit =
+          p(es) { c =>
+            eval(es) {
+              f(c)(es)(cb)
+            }
+          }
+      }
 
     def choiceViaChooser[A](p: Par[Boolean])(f: Par[A], t: Par[A]): Par[A] =
-      ???
+      chooser(p) { c =>
+        if (c) t
+        else f
+      }
 
     def choiceNChooser[A](p: Par[Int])(choices: List[Par[A]]): Par[A] =
+      chooser(p) { c => choices(c) }
+
+    def flatMap[A,B](p: Par[A])(f: A => Par[B]): Par[B] =
       ???
 
     def join[A](p: Par[Par[A]]): Par[A] =

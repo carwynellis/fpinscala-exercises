@@ -79,4 +79,48 @@ class NonblockingTest extends AsyncFunSuite with Matchers with MockitoSugar {
 
     result should be(1)
   }
+
+  test("chooser returns the expected result for given predicate and function") {
+    val p = Nonblocking.Par.unit(true)
+
+    val f = { c: Boolean =>
+      if (c) Nonblocking.Par.unit(1)
+      else Nonblocking.Par.unit(0)
+    }
+
+    val makeChoice = Nonblocking.Par.chooser(p)(f)
+
+    val result = Nonblocking.Par.run(es)(makeChoice)
+
+    result should be(1)
+  }
+
+  test("choice via chooser should return the correct par") {
+    val p = Nonblocking.Par.unit(true)
+
+    val truePar = Nonblocking.Par.unit(1)
+    val falsePar = Nonblocking.Par.unit(0)
+
+    val makeChoice = Nonblocking.Par.choiceViaChooser(p)(falsePar, truePar)
+
+    val result = Nonblocking.Par.run(es)(makeChoice)
+
+    result should be(1)
+  }
+
+  test("choiceNChooser chooses the correct par to run") {
+    val parList = List(
+      Nonblocking.Par.unit(0),
+      Nonblocking.Par.unit(1),
+      Nonblocking.Par.unit(2)
+    )
+
+    val choice = Nonblocking.Par.unit(1)
+
+    val makeChoice = Nonblocking.Par.choiceNChooser(choice)(parList)
+
+    val result = Nonblocking.Par.run(es)(makeChoice)
+
+    result should be(1)
+  }
 }
