@@ -174,11 +174,17 @@ object Nonblocking {
           p(es) { c => eval(es) { ps(c)(es)(cb) } }
       }
 
-    def choiceViaChoiceN[A](a: Par[Boolean])(ifTrue: Par[A], ifFalse: Par[A]): Par[A] =
-      ???
-
     def choiceMap[K,V](p: Par[K])(ps: Map[K,Par[V]]): Par[V] =
-      ???
+      es => new Future[V] {
+        def apply(cb: V => Unit, eh: Exception => Unit): Unit =
+          p(es) { key =>
+            eval(es) {
+              ps.get(key) foreach { chosenPar =>
+                chosenPar(es)(cb)
+              }
+            }
+          }
+      }
 
     // see `Nonblocking.scala` answers file. This function is usually called something else!
     def chooser[A,B](p: Par[A])(f: A => Par[B]): Par[B] =

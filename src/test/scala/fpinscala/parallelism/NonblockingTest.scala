@@ -63,4 +63,20 @@ class NonblockingTest extends AsyncFunSuite with Matchers with MockitoSugar {
 
     result should be("false")
   }
+
+  test("choiceMap chooses the correct par to run") {
+    val parMap = Map(
+      "par0" -> Nonblocking.Par.unit(0),
+      "par1" -> Nonblocking.Par.unit(1),
+      "par2" -> Nonblocking.Par.unit(2)
+    )
+
+    val choice = Nonblocking.Par.unit("par1")
+
+    val makeChoice = Nonblocking.Par.choiceMap(choice)(parMap)
+
+    val result = Nonblocking.Par.run(es)(makeChoice)
+
+    result should be(1)
+  }
 }
