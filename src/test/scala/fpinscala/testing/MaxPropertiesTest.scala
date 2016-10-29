@@ -8,7 +8,7 @@ import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
   *
   *   max: List[Int] => Int
   */
-class MaxPropertiesSpec extends FunSuite with Checkers with GeneratorDrivenPropertyChecks with Matchers {
+class MaxPropertiesTest extends FunSuite with Checkers with GeneratorDrivenPropertyChecks with Matchers {
 
   test("max of list of elements with same value should be that value") {
     check { n: Int => List.fill(10)(n).max == n }
