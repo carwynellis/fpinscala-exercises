@@ -8,7 +8,7 @@ import org.scalatest.prop.Checkers
   *
   *   sum: List[Int] => Int
   */
-class ScalaCheckSumSpec extends FunSuite with Checkers {
+class SumPropertiesSpec extends FunSuite with Checkers {
 
   test("sum of a list should be the same as the sum of that list reversed") {
     check { (l: List[Int]) => l.sum == l.reverse.sum }
