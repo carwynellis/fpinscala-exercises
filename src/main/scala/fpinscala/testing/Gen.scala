@@ -44,21 +44,23 @@ object Gen {
     // Build a List of Gen[A] and then use sequence to obtain a Gen[List[A]]
     Gen(State.sequence(List.fill(n)(g.sample)))
 
-}
+  def nonWhitespaceChar = choose(33, 127) map { n: Int => n.toChar }
 
-// TODO - is this needed anymore?
-//trait Gen[A] {
-//  def map[A,B](f: A => B): Gen[B] = ???
-//  def flatMap[A,B](f: A => Gen[B]): Gen[B] = ???
-//}
+  def string(n: Int): Gen[String] =
+    Gen(State.sequence(List.fill(n)(nonWhitespaceChar.sample)).map {
+      l: List[Char] => l.toString
+    })
+
+}
 
 trait SGen[+A] {
 
 }
 
 case class Gen[A](sample: State[RNG,A]) {
-  // Moved here from trait to satisfy deps in Monad code.
-  def map[A,B](f: A => B): Gen[B] = ???
-  def flatMap[A,B](f: A => Gen[B]): Gen[B] = ???
+
+  def map[B](f: A => B): Gen[B] = Gen(sample.map[B](f))
+
+  def flatMap[B](f: A => Gen[B]): Gen[B] = ???
 }
 

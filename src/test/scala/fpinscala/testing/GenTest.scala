@@ -70,4 +70,39 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
     result === List.fill(10)(true)
   }
 
+  test("nonWhitespaceChar returns a single non-whitespace character") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    val (result, _) = Gen.nonWhitespaceChar.sample.run(mockRNG)
+
+    result === '!'
+  }
+
+  test("map returns a new gen containing the result of the specified function") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    // The mocked RNG implementation will ensure choose always returns a 1
+    val choose = Gen.choose(1, 10)
+
+    // Map over the choose result with a simple function.
+    val mapped = choose.map(_ + 1)
+
+    val (result, _) = mapped.sample.run(mockRNG)
+
+    result === 2
+  }
+
+  test("string returns a string of characters of the specified length") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    val length = 5
+
+    val (result, _) = Gen.string(length).sample.run(mockRNG)
+
+    result === "!!!!!"
+  }
+
 }
