@@ -14,7 +14,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
     workers = 2
   )
 
-  test("choose should return values within the specified range") {
+  test("choose should return values within the specified range when run") {
     val min = 0
     val max = 100
 
@@ -32,4 +32,42 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
       }
     }
   }
+
+  test("unit returns the specified value when run") {
+    val value = 1
+    val genUnit = Gen.unit(value)
+    val mockRNG = mock[RNG]
+
+    val (result, _) = genUnit.sample.run(mockRNG)
+
+    result === value
+  }
+
+  test("boolean returns true when RNG returns an odd number") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((1, mockRNG))
+
+    val (result, _) = Gen.boolean.sample.run(mockRNG)
+
+    result === true
+  }
+
+  test("boolean returns false when RNG returns an odd number") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((2, mockRNG))
+
+    val (result, _) = Gen.boolean.sample.run(mockRNG)
+
+    result === false
+  }
+
+  test("listOfN returns a list of n generated values") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((1, mockRNG))
+
+    val (result, _) = Gen.listOfN(10, Gen.boolean).sample.run(mockRNG)
+
+    result === List.fill(10)(true)
+  }
+
 }
