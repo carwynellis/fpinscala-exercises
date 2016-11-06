@@ -2,12 +2,12 @@ package fpinscala.testing
 
 import fpinscala.state.RNG
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
 
 class GenTest extends FunSuite with Checkers with MockitoSugar
-  with GeneratorDrivenPropertyChecks {
+  with GeneratorDrivenPropertyChecks with Matchers {
 
   override implicit val generatorDrivenConfig = PropertyCheckConfiguration(
     minSuccessful = 500,
@@ -33,6 +33,28 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
     }
   }
 
+  test("choose should return the first value when RNG.nextInt returns 0") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    val chooser = Gen.choose(1, 10)
+
+    val (result, _) = chooser.sample.run(mockRNG)
+
+    result should be(1)
+  }
+
+  test("choose should return the last value when RNG.nextInt returns Int.MaxValue") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((Int.MaxValue, mockRNG))
+
+    val chooser = Gen.choose(1, 10)
+
+    val (result, _) = chooser.sample.run(mockRNG)
+
+    result should be(9)
+  }
+
   test("unit returns the specified value when run") {
     val value = 1
     val genUnit = Gen.unit(value)
@@ -40,7 +62,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = genUnit.sample.run(mockRNG)
 
-    result === value
+    result should be(value)
   }
 
   test("boolean returns true when RNG returns an odd number") {
@@ -49,7 +71,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = Gen.boolean.sample.run(mockRNG)
 
-    result === true
+    result should be(true)
   }
 
   test("boolean returns false when RNG returns an odd number") {
@@ -58,7 +80,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = Gen.boolean.sample.run(mockRNG)
 
-    result === false
+    result should be(false)
   }
 
   test("listOfN returns a list of n generated values") {
@@ -67,7 +89,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = Gen.listOfN(10, Gen.boolean).sample.run(mockRNG)
 
-    result === List.fill(10)(true)
+    result should be(List.fill(10)(true))
   }
 
   test("nonWhitespaceChar returns a single non-whitespace character") {
@@ -76,7 +98,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = Gen.nonWhitespaceChar.sample.run(mockRNG)
 
-    result === '!'
+    result should be('!')
   }
 
   test("map returns a new gen containing the result of the specified function") {
@@ -91,7 +113,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = mapped.sample.run(mockRNG)
 
-    result === 2
+    result should be(2)
   }
 
   test("string returns a string of characters of the specified length") {
@@ -102,7 +124,37 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = Gen.string(length).sample.run(mockRNG)
 
-    result === "!!!!!"
+    result should be("!!!!!")
+  }
+
+  test("flatMap returns a new gen containing the result of the specified function") {
+    val mockRNG = mock[RNG]
+    when(mockRNG.nextInt).thenReturn((0, mockRNG))
+
+    // The mocked RNG implementation will ensure choose always returns a 1
+    val choose = Gen.choose(1, 10)
+
+    // flatMap over the choose result with a simple function.
+    val mapped = choose.flatMap(Gen.unit(_))
+
+    val (result, _) = mapped.sample.run(mockRNG)
+
+    result should be(1)
+  }
+
+  test("listOfN on Gen class produces expected result") {
+    val mockRNG = mock[RNG]
+
+    val elements = 3
+
+    val genInt = Gen.unit[Int](elements)
+    val genString = Gen.unit[String]("foo")
+
+    val (result, _) = genString.listOfN(genInt).sample.run(mockRNG)
+
+    println(s"Generated: $result")
+
+    result should be(List.fill(elements)("foo"))
   }
 
 }

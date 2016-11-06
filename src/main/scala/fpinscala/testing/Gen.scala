@@ -24,10 +24,10 @@ object Gen {
   // For now assume positive integers only.
   def choose(start: Int, stopExclusive: Int): Gen[Int] = {
     // Map 0 -> Int.MaxValue onto the scale start - stopExclusive
-    val step = Int.MaxValue / (stopExclusive - start)
+    val step = Int.MaxValue / (stopExclusive - start - 1)
     val state = State(RNG.nonNegativeInt) map { n =>
       // Use this step to map n to our scale
-      n / step
+      start + (n / step)
     }
     Gen(state)
   }
@@ -48,7 +48,7 @@ object Gen {
 
   def string(n: Int): Gen[String] =
     Gen(State.sequence(List.fill(n)(nonWhitespaceChar.sample)).map {
-      l: List[Char] => l.toString
+      l: List[Char] => l.mkString
     })
 
 }
@@ -61,6 +61,11 @@ case class Gen[A](sample: State[RNG,A]) {
 
   def map[B](f: A => B): Gen[B] = Gen(sample.map[B](f))
 
-  def flatMap[B](f: A => Gen[B]): Gen[B] = ???
+  def flatMap[B](f: A => Gen[B]): Gen[B] =
+    Gen(sample.flatMap[B](a => f(a).sample))
+
+  def listOfN(size: Gen[Int]): Gen[List[A]] =
+    size flatMap { n => Gen.listOfN(n, this) }
+
 }
 
