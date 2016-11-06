@@ -53,9 +53,8 @@ object Gen {
 
   // Select the generator randomly according to whether the next random int is
   // odd or even
-  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = {
-    choose(0, 2) flatMap { n => if (n == 0) g1 else g2 }
-  }
+  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] =
+    boolean.flatMap(b => if (b) g1 else g2)
 
 }
 

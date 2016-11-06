@@ -161,7 +161,7 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
     // Mock up two responses to trigger selection of the first and second gen
     when(mockRNG.nextInt)
       .thenReturn((1, mockRNG))
-      .thenReturn((Int.MaxValue, mockRNG))
+      .thenReturn((2, mockRNG))
 
     val g1 = Gen.unit[Int](1)
     val g2 = Gen.unit[Int](2)
