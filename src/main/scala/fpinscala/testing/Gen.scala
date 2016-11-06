@@ -56,6 +56,21 @@ object Gen {
   def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] =
     boolean.flatMap(b => if (b) g1 else g2)
 
+  // Use choose to select a number from 0 to Int.MaxValue
+  // Let w = (Int.MaxValue * g1.weight)
+  // Let n = next result of choose
+  // If n < w select g1, otherwise select g2.
+  // This ensures that generators are selected with a weighted bias.
+  // Assumes that the sum of the weights = 1
+  def weighted[A](g1: (Gen[A],Double), g2: (Gen[A], Double)): Gen[A] = {
+    val g1UpperBound = (g1._2 * Int.MaxValue).toInt
+    choose(0, Int.MaxValue) flatMap { n =>
+      println(s"weighted: comparing $n to bound: ${g1UpperBound}")
+      if (n < g1UpperBound) g1._1 else g2._1
+    }
+
+  }
+
 }
 
 trait SGen[+A] {

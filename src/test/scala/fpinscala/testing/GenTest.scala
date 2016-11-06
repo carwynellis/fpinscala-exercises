@@ -168,15 +168,39 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val union = Gen.union(g1, g2)
 
-    val (result, _) = union.sample.run(mockRNG)
+    val (r1, _) = union.sample.run(mockRNG)
+    r1 should be(1)
 
-    result should be(1)
-
-    val (secondResult, _) = union.sample.run(mockRNG)
-
-    secondResult should be(2)
+    val (r2, _) = union.sample.run(mockRNG)
+    r2 should be(2)
   }
 
+  test("weighted should select generators according to specified weights") {
+    val mockRNG = mock[RNG]
 
+    // Mock two responses that will trigger selection of the first and second
+    // generator on successive calls.
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+      .thenReturn((Int.MaxValue, mockRNG))
+      // Check boundary logic. If returned value is equal to g1 upper bound
+      // then g2 should be returned
+      .thenReturn(((Int.MaxValue * 0.25).toInt, mockRNG))
+      // Likewise if returned value equals uppoer bound - 1, g1 should be
+      // returned
+      .thenReturn(((Int.MaxValue * 0.25).toInt - 1, mockRNG))
+
+    val g1 = Gen.unit[Int](1)
+    val g2 = Gen.unit[Int](2)
+
+    val weighted = Gen.weighted((g1, 0.25), (g2, 0.75))
+
+    val results = List.range(0, 4) map { _ =>
+      val (r, _) = weighted.sample.run(mockRNG)
+      r
+    }
+
+    results should be(List(1,2,2,1))
+  }
 
 }
