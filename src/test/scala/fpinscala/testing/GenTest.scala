@@ -152,9 +152,31 @@ class GenTest extends FunSuite with Checkers with MockitoSugar
 
     val (result, _) = genString.listOfN(genInt).sample.run(mockRNG)
 
-    println(s"Generated: $result")
-
     result should be(List.fill(elements)("foo"))
   }
+
+  test("union should combine two generators with equal likelihood") {
+    val mockRNG = mock[RNG]
+
+    // Mock up two responses to trigger selection of the first and second gen
+    when(mockRNG.nextInt)
+      .thenReturn((1, mockRNG))
+      .thenReturn((Int.MaxValue, mockRNG))
+
+    val g1 = Gen.unit[Int](1)
+    val g2 = Gen.unit[Int](2)
+
+    val union = Gen.union(g1, g2)
+
+    val (result, _) = union.sample.run(mockRNG)
+
+    result should be(1)
+
+    val (secondResult, _) = union.sample.run(mockRNG)
+
+    secondResult should be(2)
+  }
+
+
 
 }
