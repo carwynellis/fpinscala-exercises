@@ -10,18 +10,29 @@ import fpinscala.testing.Prop._
   * through the chapter.
   */
 
-case class Prop(run: (TestCases, RNG) => Result) {
+case class Prop(label: String, run: (TestCases, RNG) => Result) {
 
-  def &&(p: Prop): Prop = Prop { (n, rng) =>
+  def &&(p: Prop): Prop = Prop(s"$label && ${p.label}", { (n, rng) =>
     run(n, rng) match {
       case Passed => p.run(n, rng)
       case falsified => falsified
       }
-    }
+    })
 
-  def ||(p: Prop) = Prop { (n, rng) =>
+  def ||(p: Prop) = Prop(s"$label || ${p.label}", { (n, rng) =>
     run(n, rng) match {
-      case Falsified(message, successes) => p.run(n, rng)
+      case Falsified(message, successes) => tagWithPreviousFailure(message, p, n, rng)
+      case passed => passed
+    }
+  })
+
+  // Only really applies to the || operator. If both fail then ensure we
+  // output both failure reasons.
+  def tagWithPreviousFailure(failure: String, p: Prop, n: TestCases, rng: RNG) = {
+    p.run(n, rng) match {
+      case Falsified(message, successes) => Falsified(
+        s"$failure\n$message", successes
+      )
       case passed => passed
     }
   }
@@ -46,18 +57,22 @@ object Prop {
     def isFalsified = true
   }
 
-  def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
+  def forAll[A](as: Gen[A], label: String)(f: A => Boolean): Prop = Prop(label, {
     (n,rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
       case (a, i) => try {
-        if (f(a)) Passed else Falsified(a.toString, i)
-      } catch { case e: Exception => Falsified(buildMsg(a, e), i) }
+        if (f(a))
+          Passed
+        else
+          Falsified(s"Property: $label failed on value: $a", i)
+      } catch { case e: Exception => Falsified(buildMsg(label, a, e), i) }
     }.find(_.isFalsified).getOrElse(Passed)
-  }
+  })
 
   def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] =
     Stream.unfold(rng)(rng => Some(g.sample.run(rng)))
 
-  def buildMsg[A](s: A, e: Exception): String =
+  def buildMsg[A](property: String, s: A, e: Exception): String =
+    s"property: $property\n" +
     s"test case: $s\n" +
     s"generated an exception: ${e.getMessage}\n" +
     s"stack trace: \n ${e.getStackTrace.mkString("\n")}"
