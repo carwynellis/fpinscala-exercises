@@ -4,12 +4,29 @@ import fpinscala.state._
 import fpinscala.laziness.Stream
 import fpinscala.testing.Prop._
 
-/*
-The library developed in this chapter goes through several iterations. This file is just the
-shell, which you can fill in and modify while working through the chapter.
-*/
+/**
+  * The library developed in this chapter goes through several iterations. This
+  * file is just the shell, which you can fill in and modify while working
+  * through the chapter.
+  */
 
-case class Prop(run: (TestCases, RNG) => Result)
+case class Prop(run: (TestCases, RNG) => Result) {
+
+  def &&(p: Prop): Prop = Prop { (n, rng) =>
+    run(n, rng) match {
+      case Passed => p.run(n, rng)
+      case falsified => falsified
+      }
+    }
+
+  def ||(p: Prop) = Prop { (n, rng) =>
+    run(n, rng) match {
+      case Falsified(message, successes) => p.run(n, rng)
+      case passed => passed
+    }
+  }
+
+}
 
 object Prop {
   type FailedCase = String
