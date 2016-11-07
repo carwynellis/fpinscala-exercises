@@ -88,10 +88,15 @@ trait Stream[+A] {
     case _ => None
   }
 
-  def zipWith[S >: A, B](s: Stream[S])(f: (A,S) => B): Stream[B] = unfold(this, s) {
+  def zipWith[B,C](s: Stream[B])(f: (A,B) => C): Stream[C] = unfold(this, s) {
     case (Cons(a,b), Cons(x,y)) => Some( (f(a(), x()), (b(), y())) )
     case _ => None
   }
+
+  // This is needed by Gen.scala - no mention of this function in the
+  // laziness chapter as far as I can see.
+  def zip[B](s2: Stream[B]): Stream[(A,B)] = zipWith(s2)((_,_))
+
 
   // TODO - Urgh - parens hell :(
   def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = unfold(this, s2) {
