@@ -71,6 +71,21 @@ object Prop {
     }.find(_.isFalsified).getOrElse(Passed)
   })
 
+  def forAll[A](g: SGen[A], label: String)(f: A => Boolean): Prop =
+    forAll(g(_), label)(f)
+
+  def forAll[A](g: Int => Gen[A], label: String)(f: A => Boolean): Prop = Prop(label, {
+    (max,n,rng) =>
+      val casesPerSize = (n - 1) / max + 1
+      val props: Stream[Prop] =
+        Stream.from(0).take((n min max) + 1).map(i => forAll(g(i), label)(f))
+      val prop: Prop =
+        props.map(p => Prop (label, { (max, n, rng) =>
+          p.run(max, casesPerSize, rng)
+        })).toList.reduce(_ && _)
+      prop.run(max,n,rng)
+  })
+
   def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] =
     Stream.unfold(rng)(rng => Some(g.sample.run(rng)))
 
