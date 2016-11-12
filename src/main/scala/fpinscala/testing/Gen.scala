@@ -132,7 +132,20 @@ object Gen {
 
 }
 
-case class SGen[A](forSize: Int => Gen[A])
+case class SGen[A](forSize: Int => Gen[A]) {
+
+  def apply(size: Int): Gen[A] = forSize(size)
+
+  def map[B](f: A => B): SGen[B] = SGen { i => forSize(i).map(f) }
+
+  def flatMap[B](f: A => SGen[B]): SGen[B] = SGen { i =>
+    forSize(i).flatMap { v =>
+      val res = f(v)
+      res(i)
+    }
+  }
+
+}
 
 case class Gen[A](sample: State[RNG,A]) {
 
