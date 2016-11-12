@@ -39,4 +39,14 @@ class SGenTest extends FunSuite with MockitoSugar with Matchers {
 
     result should be(List.fill(5)(1))
   }
+
+  test("listOfAtLeastOne should return an SGen that generates a single element list if 0 elements requested") {
+    val mockRNG = mock[RNG]
+
+    val sGen = SGen.listOfAtLeastOne(Gen.unit(1))
+
+    val (result, _) = sGen(0).sample.run(mockRNG)
+
+    result should be(List(1))
+  }
 }

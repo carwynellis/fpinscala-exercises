@@ -6,8 +6,8 @@ object GenSpecifications extends App {
   val smallInt = Gen.choose(-10, 10)
 
   val maxProp = Prop.forAll(
-    SGen.listOf(smallInt),
-    "max of list should be greater than or equal to every other element") { ns =>
+    SGen.listOfAtLeastOne(smallInt),
+    "max of list should be greater than or equal to every other element") { ns: List[Int] =>
       val max = ns.max
       !ns.exists(_ > max)
     }

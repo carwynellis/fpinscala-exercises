@@ -178,6 +178,9 @@ case class SGen[A](forSize: Int => Gen[A]) {
 
 object SGen {
   def listOf[A](g: Gen[A]): SGen[List[A]] = SGen { i => Gen.listOfN(i, g) }
+
+  def listOfAtLeastOne[A](g: Gen[A]): SGen[List[A]] = SGen { i =>
+    Gen.listOfN(i.max(1), g) }
 }
 
 case class Gen[A](sample: State[RNG,A]) {
