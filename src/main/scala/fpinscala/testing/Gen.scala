@@ -147,6 +147,10 @@ case class SGen[A](forSize: Int => Gen[A]) {
 
 }
 
+object SGen {
+  def listOf[A](g: Gen[A]): SGen[List[A]] = SGen { i => Gen.listOfN(i, g) }
+}
+
 case class Gen[A](sample: State[RNG,A]) {
 
   def map[B](f: A => B): Gen[B] = Gen(sample.map[B](f))
@@ -158,6 +162,5 @@ case class Gen[A](sample: State[RNG,A]) {
     size flatMap { n => Gen.listOfN(n, this) }
 
   def unsized: SGen[A] = SGen(_ => this)
-
 }
 

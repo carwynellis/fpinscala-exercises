@@ -29,4 +29,14 @@ class SGenTest extends FunSuite with MockitoSugar with Matchers {
 
     result should be(2)
   }
+
+  test("listOf should return an SGen that generates lists of the requested size") {
+    val mockRNG = mock[RNG]
+
+    val sGen = SGen.listOf(Gen.unit(1))
+
+    val (result, _) = sGen(5).sample.run(mockRNG)
+
+    result should be(List.fill(5)(1))
+  }
 }
