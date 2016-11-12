@@ -10,26 +10,28 @@ import fpinscala.testing.Prop._
   * through the chapter.
   */
 
-case class Prop(label: String, run: (TestCases, RNG) => Result) {
+case class Prop(label: String, run: (MaxSize, TestCases, RNG) => Result) {
 
-  def &&(p: Prop): Prop = Prop(s"$label && ${p.label}", { (n, rng) =>
-    run(n, rng) match {
-      case Passed => p.run(n, rng)
+  def &&(p: Prop): Prop = Prop(s"$label && ${p.label}", { (max, n, rng) =>
+    run(max, n, rng) match {
+      case Passed => p.run(max, n, rng)
       case falsified => falsified
       }
     })
 
-  def ||(p: Prop) = Prop(s"$label || ${p.label}", { (n, rng) =>
-    run(n, rng) match {
-      case Falsified(message, successes) => tagWithPreviousFailure(message, p, n, rng)
+  def ||(p: Prop) = Prop(s"$label || ${p.label}", { (max, n, rng) =>
+    run(max, n, rng) match {
+      case Falsified(message, successes) =>
+        tagWithPreviousFailure(message, p, max, n, rng)
       case passed => passed
     }
   })
 
   // Only really applies to the || operator. If both fail then ensure we
   // output both failure reasons.
-  def tagWithPreviousFailure(failure: String, p: Prop, n: TestCases, rng: RNG) = {
-    p.run(n, rng) match {
+  def tagWithPreviousFailure(failure: String, p: Prop, maxSize: MaxSize,
+                             n: TestCases, rng: RNG) = {
+    p.run(maxSize, n, rng) match {
       case Falsified(message, successes) => Falsified(
         s"$failure\n$message", successes
       )
@@ -43,6 +45,7 @@ object Prop {
   type FailedCase = String
   type SuccessCount = Int
   type TestCases = Int
+  type MaxSize = Int
 
   sealed trait Result {
     def isFalsified: Boolean
@@ -58,7 +61,7 @@ object Prop {
   }
 
   def forAll[A](as: Gen[A], label: String)(f: A => Boolean): Prop = Prop(label, {
-    (n,rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
+    (max, n,rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
       case (a, i) => try {
         if (f(a))
           Passed

@@ -14,7 +14,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanTen && greaterThanZero
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(false)
   }
@@ -27,7 +27,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanTen && greaterThanTen
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(true)
   }
@@ -40,7 +40,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanZero && greaterThanTen
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(true)
   }
@@ -53,7 +53,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanTen || greaterThanZero
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(false)
   }
@@ -66,7 +66,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanTen || greaterThanTen
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(false)
   }
@@ -79,7 +79,7 @@ class PropTest extends FunSuite with Matchers {
 
     val combined = lessThanZero || greaterThanTen
 
-    val result = combined.run(100, RNG.Simple(12345))
+    val result = combined.run(100, 100, RNG.Simple(12345))
 
     result.isFalsified should be(true)
 
