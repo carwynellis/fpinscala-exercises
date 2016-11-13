@@ -92,9 +92,9 @@ object Prop {
           rng: RNG = RNG.Simple(System.currentTimeMillis)): Unit =
     p.run(maxSize, testCases, rng) match {
       case Falsified(msg, n) =>
-        println(s"! Falsified after $n passed tests:\n $msg")
+        println(s"! Falsified ${p.label} after $n passed tests:\n $msg")
       case Passed =>
-        println(s"+ OK, passed $testCases tests.")
+        println(s"+ OK, ${p.label} passed $testCases tests.")
     }
 
   def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] =
