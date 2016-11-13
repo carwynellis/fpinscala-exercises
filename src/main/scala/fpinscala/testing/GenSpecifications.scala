@@ -18,6 +18,7 @@ object GenSpecifications extends App {
           val max = ns.max
           !ns.exists(_ > max)
       }
+
     run(maxProp)
   }
 
@@ -41,6 +42,7 @@ object GenSpecifications extends App {
 
   def simpleCheckExample() = {
     val falseOrTrueCheck = Prop.check({false || true }, "f || t yields t")
+
     run(falseOrTrueCheck)
   }
 
@@ -55,8 +57,21 @@ object GenSpecifications extends App {
     run(mapProperty)
   }
 
+  def checkParForkProperty() = {
+    val forkProp = forAllPar(pint2, "fork(x) should equal x") { n  =>
+      equal(
+        Par.fork(n),
+        n
+      )
+    }
+
+    run(forkProp)
+  }
+
   maxOfListExampleProperty()
   sortedListProperty()
   simpleCheckExample()
   checkParMapProperty()
+  // TODO - fix this - does not seem to complete
+  // checkParForkProperty()
 }

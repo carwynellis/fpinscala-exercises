@@ -122,6 +122,10 @@ object Prop {
     Gen.unit(Executors.newCachedThreadPool) -> .25
   )
 
+  val pint2: Gen[Par[Int]] = choose(-100,100).listOfN(choose(0,20)).map(l =>
+    l.foldLeft(Par.unit(0))((p,i) =>
+      Par.fork { Par.map2(p, Par.unit(i))(_ + _) }))
+
   def forAllPar[A](g: Gen[A], label: String)(f: A => Par[Boolean]): Prop =
     forAll(S ** g, label) { case s ** a => f(a)(s).get }
 
