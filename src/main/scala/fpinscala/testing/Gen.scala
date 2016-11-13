@@ -15,6 +15,7 @@ case class Prop(label: String, run: (MaxSize, TestCases, RNG) => Result) {
   def &&(p: Prop): Prop = Prop(s"$label && ${p.label}", { (max, n, rng) =>
     run(max, n, rng) match {
       case Passed => p.run(max, n, rng)
+      case Proved => p.run(max, n, rng)
       case falsified => falsified
       }
     })
@@ -60,6 +61,10 @@ object Prop {
     def isFalsified = true
   }
 
+  case object Proved extends Result {
+    def isFalsified = false
+  }
+
   def forAll[A](as: Gen[A], label: String)(f: A => Boolean): Prop = Prop(label, {
     (max, n,rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
       case (a, i) => try {
@@ -86,6 +91,10 @@ object Prop {
       prop.run(max,n,rng)
   })
 
+  def check(p: => Boolean, label: String): Prop = Prop(label, { (_, _, _) =>
+    if (p) Proved else Falsified("()", 0)
+  })
+
   def run(p: Prop,
           maxSize: Int = 100,
           testCases: Int = 100,
@@ -95,6 +104,8 @@ object Prop {
         println(s"! Falsified ${p.label} after $n passed tests:\n $msg")
       case Passed =>
         println(s"+ OK, ${p.label} passed $testCases tests.")
+      case Proved =>
+        println(s"+ OK, proved property ${p.label}")
     }
 
   def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] =

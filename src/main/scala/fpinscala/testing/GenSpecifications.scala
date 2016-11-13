@@ -34,6 +34,12 @@ object GenSpecifications extends App {
     Prop.run(sortedProp)
   }
 
+  def simpleCheckExample() = {
+    val falseOrTrueCheck = Prop.check({false || true }, "f || t yields t")
+    Prop.run(falseOrTrueCheck)
+  }
+
   maxOfListExampleProperty()
   sortedListProperty()
+  simpleCheckExample()
 }
