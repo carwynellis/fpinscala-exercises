@@ -1,25 +1,30 @@
 package fpinscala.testing
 
+import Gen._
+import SGen._
+import Prop._
+import fpinscala.parallelism.Par
+
 object GenSpecifications extends App {
 
   def maxOfListExampleProperty() = {
     // Example property from section 8.4.1 - Some simple examples
-    val smallInt = Gen.choose(-10, 10)
+    val smallInt = choose(-10, 10)
 
-    val maxProp = Prop.forAll(
-      SGen.listOfAtLeastOne(smallInt),
+    val maxProp = forAll(
+      listOfAtLeastOne(smallInt),
       "max of list should be greater than or equal to every other element") {
         ns: List[Int] =>
           val max = ns.max
           !ns.exists(_ > max)
       }
-    Prop.run(maxProp)
+    run(maxProp)
   }
 
   def sortedListProperty() = {
-    val ints = Gen.choose(-100, 100)
+    val ints = choose(-100, 100)
 
-    val sortedProp = Prop.forAll(
+    val sortedProp = forAll(
       SGen.listOfAtLeastOne(ints),
       "List.sorted should always yield a sorted list") { l: List[Int] =>
         val sorted = l.sorted
@@ -31,15 +36,27 @@ object GenSpecifications extends App {
         ! (sorted.zip(sorted.tail) exists { case (a: Int, b: Int) => a > b })
       }
 
-    Prop.run(sortedProp)
+    run(sortedProp)
   }
 
   def simpleCheckExample() = {
     val falseOrTrueCheck = Prop.check({false || true }, "f || t yields t")
-    Prop.run(falseOrTrueCheck)
+    run(falseOrTrueCheck)
+  }
+
+  def checkParMapProperty() = {
+    val mapProperty = checkPar( {
+      equal(
+        Par.map(Par.unit(1))(_ + 1),
+        Par.unit(2)
+      )
+    }, "mapping a Par should return a Par containing the result of the specified function")
+
+    run(mapProperty)
   }
 
   maxOfListExampleProperty()
   sortedListProperty()
   simpleCheckExample()
+  checkParMapProperty()
 }

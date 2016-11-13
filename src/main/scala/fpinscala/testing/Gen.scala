@@ -3,6 +3,11 @@ package fpinscala.testing
 import fpinscala.state._
 import fpinscala.laziness.Stream
 import fpinscala.testing.Prop._
+import fpinscala.parallelism.Par
+import fpinscala.parallelism.Par.Par
+import java.util.concurrent.{Executors,ExecutorService}
+import Gen._
+import Prop._
 
 /**
   * The library developed in this chapter goes through several iterations. This
@@ -108,6 +113,21 @@ object Prop {
         println(s"+ OK, proved property ${p.label}")
     }
 
+  def equal[A](p: Par[A], p2: Par[A]): Par[Boolean] =
+    Par.map2(p,p2)(_ == _)
+
+  val S = Gen.weighted(
+    // `a -> b` is syntax sugar for `(a,b)`
+    Gen.choose(1,4).map(Executors.newFixedThreadPool) -> .75,
+    Gen.unit(Executors.newCachedThreadPool) -> .25
+  )
+
+  def forAllPar[A](g: Gen[A], label: String)(f: A => Par[Boolean]): Prop =
+    forAll(S ** g, label) { case s ** a => f(a)(s).get }
+
+  def checkPar(p: Par[Boolean], label: String): Prop =
+    forAllPar(Gen.unit(()), label)(_ => p)
+
   def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] =
     Stream.unfold(rng)(rng => Some(g.sample.run(rng)))
 
@@ -170,7 +190,11 @@ object Gen {
     }
   }
 
+  object ** {
+    def unapply[A,B](p: (A,B)) = Some(p)
+  }
 }
+
 
 case class SGen[A](forSize: Int => Gen[A]) {
 
@@ -198,6 +222,9 @@ case class Gen[A](sample: State[RNG,A]) {
 
   def map[B](f: A => B): Gen[B] = Gen(sample.map[B](f))
 
+  def map2[B,C](g: Gen[B])(f: (A,B) => C): Gen[C] =
+    Gen(sample.map2(g.sample)(f))
+
   def flatMap[B](f: A => Gen[B]): Gen[B] =
     Gen(sample.flatMap[B](a => f(a).sample))
 
@@ -205,5 +232,7 @@ case class Gen[A](sample: State[RNG,A]) {
     size flatMap { n => Gen.listOfN(n, this) }
 
   def unsized: SGen[A] = SGen(_ => this)
+
+  def **[B](g: Gen[B]): Gen[(A,B)] = (this map2 g)((_,_))
 }
 
