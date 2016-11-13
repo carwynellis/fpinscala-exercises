@@ -16,5 +16,24 @@ object GenSpecifications extends App {
     Prop.run(maxProp)
   }
 
+  def sortedListProperty() = {
+    val ints = Gen.choose(-100, 100)
+
+    val sortedProp = Prop.forAll(
+      SGen.listOfAtLeastOne(ints),
+      "List.sorted should always yield a sorted list") { l: List[Int] =>
+        val sorted = l.sorted
+        // Sorted list should be of the same size as the original input list
+        (l.size == sorted.size) &&
+        // Sorted list head should be less than or equal to sorted list tail
+        (sorted.head <= sorted.last) &&
+        // Successive pairs of elements should be in sorted order
+        ! (sorted.zip(sorted.tail) exists { case (a: Int, b: Int) => a > b })
+      }
+
+    Prop.run(sortedProp)
+  }
+
   maxOfListExampleProperty()
+  sortedListProperty()
 }
