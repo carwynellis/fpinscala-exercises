@@ -3,7 +3,7 @@ package fpinscala.testing
 import Gen._
 import SGen._
 import Prop._
-import fpinscala.parallelism.Par
+import fpinscala.parallelism.Nonblocking._
 
 object GenSpecifications extends App {
 
@@ -30,7 +30,6 @@ object GenSpecifications extends App {
       "List.sorted should always yield a sorted list") { l: List[Int] =>
         val sorted = l.sorted
         // Sorted list should be of the same size as the original input list
-        (l.size == sorted.size) &&
         // Sorted list head should be less than or equal to sorted list tail
         (sorted.head <= sorted.last) &&
         // Successive pairs of elements should be in sorted order
@@ -72,6 +71,6 @@ object GenSpecifications extends App {
   sortedListProperty()
   simpleCheckExample()
   checkParMapProperty()
-  // TODO - fix this - does not seem to complete
-  // checkParForkProperty()
+  // TODO - this does not terminate upon test completion
+  checkParForkProperty()
 }

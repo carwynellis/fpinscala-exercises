@@ -3,8 +3,8 @@ package fpinscala.testing
 import fpinscala.state._
 import fpinscala.laziness.Stream
 import fpinscala.testing.Prop._
-import fpinscala.parallelism.Par
-import fpinscala.parallelism.Par.Par
+import fpinscala.parallelism.Nonblocking._
+import fpinscala.parallelism.Nonblocking.Par
 import java.util.concurrent.{Executors,ExecutorService}
 import Gen._
 import Prop._
@@ -116,18 +116,13 @@ object Prop {
   def equal[A](p: Par[A], p2: Par[A]): Par[Boolean] =
     Par.map2(p,p2)(_ == _)
 
-  val S = Gen.weighted(
-    // `a -> b` is syntax sugar for `(a,b)`
-    Gen.choose(1,4).map(Executors.newFixedThreadPool) -> .75,
-    Gen.unit(Executors.newCachedThreadPool) -> .25
+  val S = weighted(
+    choose(1,4).map { i => Executors.newFixedThreadPool(i) }  -> .75,
+    unit(Executors.newCachedThreadPool) -> .25
   )
 
-  val pint2: Gen[Par[Int]] = choose(-100,100).listOfN(choose(0,20)).map(l =>
-    l.foldLeft(Par.unit(0))((p,i) =>
-      Par.fork { Par.map2(p, Par.unit(i))(_ + _) }))
-
   def forAllPar[A](g: Gen[A], label: String)(f: A => Par[Boolean]): Prop =
-    forAll(S ** g, label) { case s ** a => f(a)(s).get }
+    forAll(S ** g, label) { case s ** a => Par.run(s)(f(a)) }
 
   def checkPar(p: Par[Boolean], label: String): Prop =
     forAllPar(Gen.unit(()), label)(_ => p)
@@ -197,6 +192,18 @@ object Gen {
   object ** {
     def unapply[A,B](p: (A,B)) = Some(p)
   }
+
+  /* A `Gen[Par[Int]]` generated from a list summation that spawns a new parallel
+  * computation for each element of the input list summed to produce the final
+  * result. This is not the most compelling example, but it provides at least some
+  * variation in structure to use for testing.
+  *
+  * Note that this has to be a `lazy val` because of the way Scala initializes objects.
+  * It depends on the `Prop` companion object being created, which references `pint2`.
+  */
+  lazy val pint2: Gen[Par[Int]] = choose(-100,100).listOfN(choose(0,20)).map(l =>
+    l.foldLeft(Par.unit(0))((p,i) =>
+      Par.fork { Par.map2(p, Par.unit(i))(_ + _) }))
 }
 
 

@@ -26,8 +26,7 @@ object Nonblocking {
       val latch = new CountDownLatch(1)
 
       // Asynchronously set the result, and decrement the latch.
-      p(es)(
-        { result =>
+      p(es)({ result =>
         // When an exception is raised we won't even get here so block forever
         ref.set(Right(result))
         latch.countDown()
@@ -40,6 +39,7 @@ object Nonblocking {
 
       // Block until the `latch.countDown` is invoked asynchronously
       latch.await()
+
       // TODO - the IOMonad code depends on this implementation returning an
       //        A so for now match on the either and return the value or throw
       //        an exception. Would prefer to leave it to the caller to decide
