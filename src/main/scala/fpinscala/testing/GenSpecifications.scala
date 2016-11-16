@@ -71,6 +71,7 @@ object GenSpecifications extends App {
   sortedListProperty()
   simpleCheckExample()
   checkParMapProperty()
-  // TODO - this does not terminate upon test completion
   checkParForkProperty()
+
+  shutdownExecutors
 }

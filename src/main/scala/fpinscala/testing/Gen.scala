@@ -116,9 +116,18 @@ object Prop {
   def equal[A](p: Par[A], p2: Par[A]): Par[Boolean] =
     Par.map2(p,p2)(_ == _)
 
+  private var executors = List.empty[ExecutorService]
+
+  def shutdownExecutors = executors foreach { _.shutdown() }
+
+  private def stashExecutor(exec: ExecutorService) = {
+    executors = exec :: executors
+    exec
+  }
+
   val S = weighted(
-    choose(1,4).map { i => Executors.newFixedThreadPool(i) }  -> .75,
-    unit(Executors.newCachedThreadPool) -> .25
+    choose(1,4).map { i => stashExecutor(Executors.newFixedThreadPool(i))}  -> .75,
+    unit({stashExecutor(Executors.newCachedThreadPool)}) -> .25
   )
 
   def forAllPar[A](g: Gen[A], label: String)(f: A => Par[Boolean]): Prop =
