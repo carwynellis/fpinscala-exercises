@@ -14,27 +14,29 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
   def succeed[A](a: A): Parser[A] = string("") map (_ => a)
 
   def many[A](p: Parser[A]): Parser[List[A]] =
-    map2(p, many(p))(_ :: _) or succeed(List.empty[A])
+    map2(p, nonStrict(many(p)))(_ :: _) or succeed(List.empty[A])
 
   def map[A,B](a: Parser[A])(f: A => B): Parser[B]
 
   def slice[A](p: Parser[A]): Parser[String]
 
-  def many1[A](p: Parser[A]): Parser[List[A]] = map2(p, many(p))(_ :: _)
+  def many1[A](p: Parser[A]): Parser[List[A]] = map2(p, nonStrict(many(p)))(_ :: _)
 
-  def product[A,B](p: Parser[A], p2: => Parser[B]): Parser[(A,B)]
+  def product[A,B](p: Parser[A], p2: Parser[B]): Parser[(A,B)]
 
-  def map2[A,B,C](p: Parser[A], p2: => Parser[B])(f: (A,B) => C): Parser[C] =
+  def map2[A,B,C](p: Parser[A], p2: Parser[B])(f: (A,B) => C): Parser[C] =
     // Note - tupled takes care of unpacking the tuple into discrete arguments
     //        to the function avoiding tuple boilerplate
     //        e.g. { t => f(t._1, t._2) }
-    map(product(p, p2))(f.tupled)
+    map(product(p, nonStrict(p2)))(f.tupled)
 
   def or[A](s1: Parser[A], s2: Parser[A]): Parser[A]
 
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    if (n > 1) map2(p, listOfN(n - 1, p))(_ :: _)
+    if (n > 1) map2(p, nonStrict(listOfN(n - 1, p)))(_ :: _)
     else succeed(List.empty[A])
+
+  def nonStrict[A](p: => Parser[A]): Parser[A] = p
 
   implicit def string(s: String): Parser[String]
   implicit def operators[A](p: Parser[A]):ParserOps[A] = ParserOps[A](p)
@@ -50,9 +52,9 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
 
     def map[B](f: A => B): Parser[B] = self.map(p)(f)
 
-    def **[B](p2: Parser[B]): Parser[(A,B)] = self.product(p, p2)
+    def **[B](p2: Parser[B]): Parser[(A,B)] = self.product(p, nonStrict(p2))
 
-    def product[B](p2: Parser[B]): Parser[(A,B)] = self.product(p, p2)
+    def product[B](p2: Parser[B]): Parser[(A,B)] = self.product(p, nonStrict(p2))
   }
 
   object Laws {
