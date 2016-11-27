@@ -1,11 +1,9 @@
 package fpinscala.parsing
 
-import fpinscala.testing.{Gen, Prop}
 import fpinscala.testing.Prop._
+import fpinscala.testing.{Gen, Prop}
 
-import language.higherKinds
-import language.implicitConversions
-import scala.annotation.tailrec
+import scala.language.{higherKinds, implicitConversions}
 
 trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trait
 
@@ -24,9 +22,9 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
 
   def many1[A](p: Parser[A]): Parser[List[A]] = map2(p, many(p))(_ :: _)
 
-  def product[A,B](p: Parser[A], p2: Parser[B]): Parser[(A,B)]
+  def product[A,B](p: Parser[A], p2: => Parser[B]): Parser[(A,B)]
 
-  def map2[A,B,C](p: Parser[A], p2: Parser[B])(f: (A,B) => C): Parser[C] =
+  def map2[A,B,C](p: Parser[A], p2: => Parser[B])(f: (A,B) => C): Parser[C] =
     // Note - tupled takes care of unpacking the tuple into discrete arguments
     //        to the function avoiding tuple boilerplate
     //        e.g. { t => f(t._1, t._2) }
