@@ -5,6 +5,7 @@ import fpinscala.testing.Prop._
 
 import language.higherKinds
 import language.implicitConversions
+import scala.annotation.tailrec
 
 trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trait
 
@@ -14,7 +15,8 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
 
   def succeed[A](a: A): Parser[A] = string("") map (_ => a)
 
-  def many[A](p: Parser[A]): Parser[List[A]]
+  def many[A](p: Parser[A]): Parser[List[A]] =
+    map2(p, many(p))(_ :: _) or succeed(List.empty[A])
 
   def map[A,B](a: Parser[A])(f: A => B): Parser[B]
 
@@ -31,6 +33,10 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
     map(product(p, p2))(f.tupled)
 
   def or[A](s1: Parser[A], s2: Parser[A]): Parser[A]
+
+  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
+    if (n > 1) map2(p, listOfN(n - 1, p))(_ :: _)
+    else succeed(List.empty[A])
 
   implicit def string(s: String): Parser[String]
   implicit def operators[A](p: Parser[A]):ParserOps[A] = ParserOps[A](p)
