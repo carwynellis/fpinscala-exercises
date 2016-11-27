@@ -45,7 +45,6 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
 
-    // TODO - clarify why we pass by name in this version of or
     def or[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
 
     def many = self.many(p)
