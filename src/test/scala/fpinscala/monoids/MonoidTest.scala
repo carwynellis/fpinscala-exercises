@@ -28,4 +28,8 @@ class MonoidTest extends FunSuite with Matchers {
     Monoid.booleanAnd.op(true, false) should be(false)
   }
 
+  test("optionMonoid combines two options correctly") {
+    Monoid.optionMonoid.op(Some(1), Some(2)) should be(Some(1))
+  }
+
 }

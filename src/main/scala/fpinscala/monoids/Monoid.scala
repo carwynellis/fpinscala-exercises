@@ -41,7 +41,11 @@ object Monoid {
     val zero = true
   }
 
-  def optionMonoid[A]: Monoid[Option[A]] = sys.error("todo")
+  def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
+    // Note - this could be implemented as a2.orElse(a1) too.
+    def op(a1: Option[A], a2: Option[A]) = a1.orElse(a2)
+    val zero = None
+  }
 
   def endoMonoid[A]: Monoid[A => A] = sys.error("todo")
 
