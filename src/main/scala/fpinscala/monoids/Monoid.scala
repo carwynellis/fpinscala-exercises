@@ -11,7 +11,7 @@ trait Monoid[A] {
 
 object Monoid {
 
-  val stringMonoid = new Monoid[String] {
+  lazy val stringMonoid = new Monoid[String] {
     def op(a1: String, a2: String) = a1 + a2
     val zero = ""
   }
@@ -21,13 +21,13 @@ object Monoid {
     val zero = Nil
   }
 
-  val intAddition: Monoid[Int] = sys.error("todo")
+  lazy val intAddition: Monoid[Int] = sys.error("todo")
 
-  val intMultiplication: Monoid[Int] = sys.error("todo")
+  lazy val intMultiplication: Monoid[Int] = sys.error("todo")
 
-  val booleanOr: Monoid[Boolean] = sys.error("todo")
+  lazy val booleanOr: Monoid[Boolean] = sys.error("todo")
 
-  val booleanAnd: Monoid[Boolean] = sys.error("todo")
+  lazy val booleanAnd: Monoid[Boolean] = sys.error("todo")
 
   def optionMonoid[A]: Monoid[Option[A]] = sys.error("todo")
 
@@ -74,7 +74,7 @@ object Monoid {
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
     sys.error("todo") 
 
-  val wcMonoid: Monoid[WC] = sys.error("todo")
+  lazy val wcMonoid: Monoid[WC] = sys.error("todo")
 
   def count(s: String): Int = sys.error("todo")
 
