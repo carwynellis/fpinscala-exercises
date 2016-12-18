@@ -32,4 +32,13 @@ class MonoidTest extends FunSuite with Matchers {
     Monoid.optionMonoid.op(Some(1), Some(2)) should be(Some(1))
   }
 
+  test("endoMonoid combines two endofunctions correctyl") {
+    val f: Int => Int = _ + 1
+    val g: Int => Int = _ * 2
+
+    val fg = Monoid.endoMonoid.op(f, g)
+
+    fg(3) should be(8)
+  }
+
 }

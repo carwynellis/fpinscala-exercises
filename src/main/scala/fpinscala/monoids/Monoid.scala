@@ -42,12 +42,16 @@ object Monoid {
   }
 
   def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
-    // Note - this could be implemented as a2.orElse(a1) too.
-    def op(a1: Option[A], a2: Option[A]) = a1.orElse(a2)
+    // Note - this could be implemented as a2 orElse a1  too.
+    def op(a1: Option[A], a2: Option[A]) = a1 orElse a2
     val zero = None
   }
 
-  def endoMonoid[A]: Monoid[A => A] = sys.error("todo")
+  def endoMonoid[A]: Monoid[A => A]  = new Monoid[A => A] {
+    // Note - this could be implemented as a2 andThen a1 or a1 compose a2
+    def op(a1: A => A, a2: A => A) = a1 andThen a2
+    val zero = (i: A) => i
+  }
 
   // TODO: Placeholder for `Prop`. Remove once you have implemented the `Prop`
   // data type from Part 2.
