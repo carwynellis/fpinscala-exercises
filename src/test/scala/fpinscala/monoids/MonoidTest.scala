@@ -1,5 +1,6 @@
 package fpinscala.monoids
 
+import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FunSuite, Matchers}
 
 class MonoidTest extends FunSuite with Matchers {
@@ -32,7 +33,7 @@ class MonoidTest extends FunSuite with Matchers {
     Monoid.optionMonoid.op(Some(1), Some(2)) should be(Some(1))
   }
 
-  test("endoMonoid combines two endofunctions correctyl") {
+  test("endoMonoid combines two endofunctions correctly") {
     val f: Int => Int = _ + 1
     val g: Int => Int = _ * 2
 
@@ -41,4 +42,13 @@ class MonoidTest extends FunSuite with Matchers {
     fg(3) should be(8)
   }
 
+  test("monoidLaws should hold for String Monoid") {
+    val chooseInt: Gen[Int] = Gen.choose(0, Int.MaxValue)
+    val optionMonadLaws = Monoid.monoidLaws[Option[Int]](
+      Monoid.optionMonoid[Int],
+      chooseInt.map(Some(_))
+    )
+    // TODO - run returns unit but generates output to STDOUT
+    Prop.run(optionMonadLaws)
+  }
 }
