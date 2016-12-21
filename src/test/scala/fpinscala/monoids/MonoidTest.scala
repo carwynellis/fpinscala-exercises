@@ -51,4 +51,14 @@ class MonoidTest extends FunSuite with Matchers {
     // TODO - run returns unit but generates output to STDOUT
     Prop.run(optionMonadLaws)
   }
+
+  test("concenate folds a list with a monoid correctly") {
+    val data = List("foo", "bar", "baz")
+    Monoid.concatenate(data, Monoid.stringMonoid) should be("foobarbaz")
+  }
+
+  test("foldMap folds a list correctly") {
+    val data = List("foo", "bar", "baz")
+    Monoid.foldMap(data, Monoid.stringMonoid)(identity) should be("foobarbaz")
+  }
 }
