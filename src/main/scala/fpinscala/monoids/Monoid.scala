@@ -53,6 +53,16 @@ object Monoid {
     val zero = (i: A) => i
   }
 
+  // We can get the dual of any monoid just by flipping the `op`.
+  def dual[A](m: Monoid[A]): Monoid[A] = new Monoid[A] {
+    def op(x: A, y: A): A = m.op(y, x)
+    val zero = m.zero
+  }
+
+  // Now we can have both monoids on hand:
+  def firstOptionMonoid[A]: Monoid[Option[A]] = optionMonoid[A]
+  def lastOptionMonoid[A]: Monoid[Option[A]] = dual(firstOptionMonoid)
+
   import fpinscala.testing._
   import Prop._
 
@@ -88,10 +98,10 @@ object Monoid {
     }
 
   def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B =
-    sys.error("todo")
+    foldMap(as, endoMonoid[B])(f.curried)(z)
 
   def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B =
-    sys.error("todo")
+    foldMap(as, dual(endoMonoid[B]))(a => b => f(b,a))(z)
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
     sys.error("todo")
