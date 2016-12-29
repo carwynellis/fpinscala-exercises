@@ -75,4 +75,14 @@ class MonoidTest extends FunSuite with Matchers {
       Monoid.stringMonoid.op(e, acc)
     } should be("bazbarfoo")
   }
+
+  test("foldMapV should fold an indexedSeq with an even number of elements correctly") {
+    val data = IndexedSeq("a", "b", "c", "d")
+    Monoid.foldMapV(data, Monoid.stringMonoid)(identity) should be("abcd")
+  }
+
+  test("foldMapV should fold an indexedSeq with an odd number of elements correctly") {
+    val data = IndexedSeq("a", "b", "c", "d", "e")
+    Monoid.foldMapV(data, Monoid.stringMonoid)(identity) should be("abcde")
+  }
 }

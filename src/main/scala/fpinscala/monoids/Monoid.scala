@@ -103,8 +103,25 @@ object Monoid {
   def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B =
     foldMap(as, dual(endoMonoid[B]))(a => b => f(b,a))(z)
 
-  def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
-    sys.error("todo")
+  def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    // An empty list should be handled as a no-op or 'zero' value as per the
+    // monoid being used.
+    if (as.isEmpty) m.zero
+    // Apply the function to a single value if that's all we have.
+    else if (as.length == 1) f(as.head)
+    // Otherwise continue to recurse.
+    else {
+      // Split the sequence into two lists of equal length, in the even case,
+      // or length / 2 and (length / 2) + 1 in the odd case, and recurse down
+      // until we reach a single element, whereupon the function can be
+      // applied to that value and then combined with other results as we
+      // return back up the stack.
+      // Note that the code is somewhat more concise than the description!
+      val (a, b) = as.splitAt(as.length / 2)
+
+      m.op(foldMapV(a,m)(f), foldMapV(b,m)(f))
+    }
+  }
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
     sys.error("todo")
