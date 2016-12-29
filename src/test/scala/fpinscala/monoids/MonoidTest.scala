@@ -71,8 +71,8 @@ class MonoidTest extends FunSuite with Matchers {
 
   test("foldRight should fold a list correctly") {
     val data = List("foo", "bar", "baz")
-    Monoid.foldRight(data)(""){ (acc: String, e: String) =>
+    Monoid.foldRight(data)(""){ (e: String, acc: String) =>
       Monoid.stringMonoid.op(e, acc)
-    } should be("foobarbaz")
+    } should be("bazbarfoo")
   }
 }
