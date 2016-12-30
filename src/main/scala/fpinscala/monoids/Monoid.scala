@@ -201,7 +201,20 @@ object Monoid {
     def zero = Stub("")
   }
 
-  def count(s: String): Int = sys.error("todo")
+  def count(s: String): Int = {
+
+    def wcForString(w: String) = if (w.length == 0) 0 else 1
+
+    foldMapV(s.toIndexedSeq, wcMonoid){ c: Char =>
+      if (c.isWhitespace) Part("", 0, "")
+      else Stub(c.toString)
+    } match {
+      case Stub(_) => 0
+      case Part(l, n, r) =>
+        wcForString(l) + n + wcForString(r)
+    }
+
+  }
 
   def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
     sys.error("todo")

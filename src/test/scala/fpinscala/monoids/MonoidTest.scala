@@ -141,5 +141,23 @@ class MonoidTest extends FunSuite with Matchers {
     // TODO - run returns unit but generates output to STDOUT
     Prop.run(wcMonoidLaws)
   }
+
+  test("count returns the correct word count for a given string") {
+    val text = "lorem ipsum dolor sit amet"
+    Monoid.count(text) should be(5)
+  }
+
+  test("count returns 0 for empty string") {
+    Monoid.count("") should be(0)
+  }
+
+  test("count returns 0 for a string containing only spaces") {
+    Monoid.count("          ") should be(0)
+  }
+
+  test("count ignores leading and trailing whitespace") {
+    val text = "   lorem ipsum dolor sit amet    "
+    Monoid.count(text) should be(5)
+  }
 }
 
