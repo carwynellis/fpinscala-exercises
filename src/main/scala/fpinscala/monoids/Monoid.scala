@@ -82,8 +82,8 @@ object Monoid {
         y <- gen
         z <- gen
       } yield(x,y,z), "monoid associativity law") { t =>
-        val (x,y,z) = t
-        m.op(m.op(x,y), z) == m.op(x, m.op(y,z))
+      val (x,y,z) = t
+      m.op(m.op(x,y), z) == m.op(x, m.op(y,z))
     }
   }
 
@@ -165,10 +165,6 @@ object Monoid {
     }
   }
 
-  sealed trait WC
-  case class Stub(chars: String) extends WC
-  case class Part(lStub: String, words: Int, rStub: String) extends WC
-
   def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
     def op(x: Par[A], y: Par[A]) = x.map2(y)(m.op)
     def zero = Par.unit(m.zero)
@@ -184,7 +180,26 @@ object Monoid {
 
   }
 
-  lazy val wcMonoid: Monoid[WC] = sys.error("todo")
+  sealed trait WC
+  case class Stub(chars: String) extends WC
+  case class Part(lStub: String, words: Int, rStub: String) extends WC
+
+  lazy val wcMonoid: Monoid[WC] = new Monoid[WC] {
+    def op(x: WC, y: WC) = (x,y) match {
+      case (Stub(lChars), Stub(rChars)) => Stub(lChars + rChars)
+      case (Part(lStub, words, rStub), Stub(chars)) => Part(lStub, words, rStub + chars)
+      case (Stub(chars), Part(lStub, words, rStub)) => Part(chars + lStub, words, rStub)
+      case (Part(lStub1, words1, rStub1), Part(lStub2, words2, rStub2)) =>
+        // Note we need to handle case where we join two parts that may hold
+        // parts of a complete word, e.g. rStub1 + lStub2 may be a word.
+        val combinedWord = rStub1 + lStub2
+        val combinedWordCount = if (combinedWord.isEmpty) 0 else 1
+        // Now that we have combined rStub1 and lStub2 we create a new part
+        // that starts with lStub1 and ends with rStub2.
+        Part(lStub1, words1 + words2 + combinedWordCount, rStub2)
+    }
+    def zero = Stub("")
+  }
 
   def count(s: String): Int = sys.error("todo")
 

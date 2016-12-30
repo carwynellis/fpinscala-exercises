@@ -2,7 +2,9 @@ package fpinscala.monoids
 
 import java.util.concurrent.Executors
 
+import fpinscala.monoids.Monoid.{Part, Stub, WC}
 import fpinscala.parallelism.Nonblocking.Par
+import fpinscala.state.{RNG, State}
 import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FunSuite, Matchers}
 
@@ -45,14 +47,14 @@ class MonoidTest extends FunSuite with Matchers {
     fg(3) should be(8)
   }
 
-  test("monoidLaws should hold for String Monoid") {
+  test("monoidLaws should hold for Option Monoid") {
     val chooseInt: Gen[Int] = Gen.choose(0, Int.MaxValue)
-    val optionMonadLaws = Monoid.monoidLaws[Option[Int]](
+    val optionMonoidLaws = Monoid.monoidLaws[Option[Int]](
       Monoid.optionMonoid[Int],
       chooseInt.map(Some(_))
     )
     // TODO - run returns unit but generates output to STDOUT
-    Prop.run(optionMonadLaws)
+    Prop.run(optionMonoidLaws)
   }
 
   test("concenate folds a list with a monoid correctly") {
@@ -116,6 +118,28 @@ class MonoidTest extends FunSuite with Matchers {
   test("ordered returns true for an indexedSeq containing identical values") {
     val ordered = IndexedSeq(1,1,1,1,1)
     Monoid.ordered(ordered) should be(true)
+  }
+
+  test("monoidLaws should hold for WC Monoid") {
+    def chooseWC: Gen[WC] = {
+      val state = State(RNG.nonNegativeInt) map { n =>
+        if (n % 2 == 1) {
+          // TODO - gen string randomly
+          Stub("a")
+        }
+        else {
+          // TODO - gen strings
+          Part("b", n, "c")
+        }
+      }
+      Gen(state)
+    }
+    val wcMonoidLaws = Monoid.monoidLaws[WC](
+      Monoid.wcMonoid,
+      chooseWC
+    )
+    // TODO - run returns unit but generates output to STDOUT
+    Prop.run(wcMonoidLaws)
   }
 }
 
