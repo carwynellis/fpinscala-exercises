@@ -123,8 +123,47 @@ object Monoid {
     }
   }
 
-  def ordered(ints: IndexedSeq[Int]): Boolean =
-    sys.error("todo")
+  def ordered(ints: IndexedSeq[Int]): Boolean = {
+    // Define a monoid that can be used to compare two values and return a
+    // boolean indicating whether the values are ordered or not, assuming
+    // ascending order is required.
+    // We will need some sort of tuple since the monoid types must be
+    // consistent preventing us from defining and op that takes two ints and
+    // returns a boolean.
+    // Our life is made slightly easier since ordered is constrained to ints.
+    def orderedIntMonoid: Monoid[Option[(Int, Boolean)]] = new Monoid[Option[(Int, Boolean)]] {
+      def op(a: Option[(Int, Boolean)], b: Option[(Int, Boolean)]) = {
+        (a,b) match {
+          case (Some(l),Some(r)) =>
+            // We will store the maximum value in the result
+            val max = l._1 max r._1
+            // If r contains the max then these two elements are sorted so we
+            // can return true
+            // However we must never lose a false value so combine the booleans
+            // we have already with the equality test.
+            val isOrdered = l._2 && r._2 && (r._1 == max)
+            Some(max, isOrdered)
+          // In the cases were we only have a left or right value just return
+          // that since no further comparisons can be made.
+          case (Some(l), None) => Some(l)
+          case (None, Some(r)) => Some(r)
+          // For now return the zero value
+          case (None, None) => zero
+        }
+      }
+      // TODO - it might be more correct to define this as
+      //        Some(Int.MinValue, true) when combining with other values.
+      def zero = None
+    }
+
+    val result = foldMapV(ints, orderedIntMonoid)(i => Some(i, true))
+
+    result match {
+      case Some((i, ordered)) => ordered
+      // TODO - is this a sensible default in the None case?
+      case None => false
+    }
+  }
 
   sealed trait WC
   case class Stub(chars: String) extends WC

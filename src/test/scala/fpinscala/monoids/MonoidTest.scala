@@ -97,4 +97,25 @@ class MonoidTest extends FunSuite with Matchers {
 
     Par.run(executorService)(parMonoid) should be("abcd")
   }
+
+  test("ordered returns true for an ordered indexedSeq") {
+    val ordered = IndexedSeq(1,2,3,4,5)
+    Monoid.ordered(ordered) should be(true)
+  }
+
+  test("ordered returns false for an unordered indexedSeq") {
+    val unordered = IndexedSeq(5,4,3,2,1)
+    Monoid.ordered(unordered) should be(false)
+  }
+
+  test("ordered returns false for another unordered indexedSeq") {
+    val unordered = IndexedSeq(1,2,3,5,4)
+    Monoid.ordered(unordered) should be(false)
+  }
+
+  test("ordered returns true for an indexedSeq containing identical values") {
+    val ordered = IndexedSeq(1,1,1,1,1)
+    Monoid.ordered(ordered) should be(true)
+  }
 }
+
