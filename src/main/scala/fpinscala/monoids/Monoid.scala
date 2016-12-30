@@ -130,11 +130,20 @@ object Monoid {
   case class Stub(chars: String) extends WC
   case class Part(lStub: String, words: Int, rStub: String) extends WC
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] = 
-    sys.error("todo")
+  def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
+    def op(x: Par[A], y: Par[A]) = x.map2(y)(m.op)
+    def zero = Par.unit(m.zero)
+  }
 
-  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
-    sys.error("todo") 
+  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = {
+
+    // Map over the input seq in parallel and then fold in parallel using the
+    // monoid op.
+    Par.parMap(v)(f).flatMap { seq =>
+      foldMapV(seq, par(m)) { e => Par.unit(e) }
+    }
+
+  }
 
   lazy val wcMonoid: Monoid[WC] = sys.error("todo")
 

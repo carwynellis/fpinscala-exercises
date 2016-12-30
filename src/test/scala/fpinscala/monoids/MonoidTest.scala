@@ -1,5 +1,8 @@
 package fpinscala.monoids
 
+import java.util.concurrent.Executors
+
+import fpinscala.parallelism.Nonblocking.Par
 import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FunSuite, Matchers}
 
@@ -84,5 +87,14 @@ class MonoidTest extends FunSuite with Matchers {
   test("foldMapV should fold an indexedSeq with an odd number of elements correctly") {
     val data = IndexedSeq("a", "b", "c", "d", "e")
     Monoid.foldMapV(data, Monoid.stringMonoid)(identity) should be("abcde")
+  }
+
+  test("parFoldMap should fold an indexedSeq correctly") {
+    val data = IndexedSeq("a", "b", "c", "d")
+    val executorService = Executors.newWorkStealingPool()
+
+    val parMonoid = Monoid.parFoldMap(data, Monoid.stringMonoid)(identity)
+
+    Par.run(executorService)(parMonoid) should be("abcd")
   }
 }
