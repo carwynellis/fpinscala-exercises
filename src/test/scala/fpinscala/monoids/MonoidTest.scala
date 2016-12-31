@@ -159,5 +159,78 @@ class MonoidTest extends FunSuite with Matchers {
     val text = "   lorem ipsum dolor sit amet    "
     Monoid.count(text) should be(5)
   }
+
+  test("ListFoldable foldRight returns expected result") {
+    val data = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldRight(data)(""){ (elem, acc) =>
+      acc + s"$elem"
+    }
+    result should be("54321")
+  }
+
+  test("ListFoldable foldLeft returns expected result") {
+    val data = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldLeft(data)(""){ (acc, elem) =>
+      acc + s"$elem"
+    }
+    result should be("12345")
+  }
+
+  test("ListFoldable foldMap returns expected result") {
+    val data = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldMap[Int, String](data) { (i: Int) =>
+      (i + 1).toString
+    } (Monoid.stringMonoid)
+    result should be("23456")
+  }
+
+  test("IndexedSeqFoldable foldRight returns expected result") {
+    val data = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldRight(data)(""){ (elem, acc) =>
+      acc + s"$elem"
+    }
+    result should be("54321")
+  }
+
+  test("IndexedSeqFoldable foldLeft returns expected result") {
+    val data = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldLeft(data)(""){ (acc, elem) =>
+      acc + s"$elem"
+    }
+    result should be("12345")
+  }
+
+  test("IndexedSeqFoldable foldMap returns expected result") {
+    val data = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldMap[Int, String](data) { (i: Int) =>
+      (i + 1).toString
+    } (Monoid.stringMonoid)
+    result should be("23456")
+  }
+
+  test("StreamFoldable foldRight returns expected result") {
+    val data = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldRight(data)(""){ (elem, acc) =>
+      acc + s"$elem"
+    }
+    result should be("54321")
+  }
+
+  test("StreamFoldable foldLeft returns expected result") {
+    val data = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldLeft(data)(""){ (acc, elem) =>
+      acc + s"$elem"
+    }
+    result should be("12345")
+  }
+
+  test("StreamFoldable foldMap returns expected result") {
+    val data = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldMap[Int, String](data) { (i: Int) =>
+      (i + 1).toString
+    } (Monoid.stringMonoid)
+    result should be("23456")
+  }
+
 }
 
