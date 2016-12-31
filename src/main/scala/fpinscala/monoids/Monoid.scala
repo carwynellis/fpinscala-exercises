@@ -314,11 +314,14 @@ object TreeFoldable extends Foldable[Tree] {
 }
 
 object OptionFoldable extends Foldable[Option] {
+
   override def foldMap[A, B](as: Option[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    foldLeft(as)(mb.zero)( (acc, elem) => mb.op(acc, f(elem)))
+
   override def foldLeft[A, B](as: Option[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    as.foldLeft(z)(f)
+
   override def foldRight[A, B](as: Option[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    as.foldRight(z)(f)
 }
 

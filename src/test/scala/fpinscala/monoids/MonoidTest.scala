@@ -256,5 +256,29 @@ class MonoidTest extends FunSuite with Matchers {
     result should be("234")
   }
 
+  test("OptionFoldable foldRight returns expected result") {
+    val o = Some(5)
+    val result: String = OptionFoldable.foldRight(o)(""){ (elem, acc) =>
+      acc + s"$elem"
+    }
+    result should be("5")
+  }
+
+  test("OptionFoldable foldLeft returns expected result") {
+    val o = Some(5)
+    val result: String = OptionFoldable.foldLeft(o)(""){ (acc, elem) =>
+      acc + s"$elem"
+    }
+    result should be("5")
+  }
+
+  test("OptionFoldable foldMap returns expected result") {
+    val o = Some(5)
+    val result: String = OptionFoldable.foldMap[Int, String](o) { (i: Int) =>
+      (i + 1).toString
+    } (Monoid.stringMonoid)
+    result should be("6")
+  }
+
 }
 
