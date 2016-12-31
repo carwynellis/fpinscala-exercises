@@ -232,5 +232,29 @@ class MonoidTest extends FunSuite with Matchers {
     result should be("23456")
   }
 
+  test("TreeFoldable foldRight returns expected result") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
+    val result: String = TreeFoldable.foldRight(t)(""){ (elem, acc) =>
+      acc + s"$elem"
+    }
+    result should be("321")
+  }
+
+  test("TreeFoldable foldLeft returns expected result") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
+    val result: String = TreeFoldable.foldLeft(t)(""){ (acc, elem) =>
+      acc + s"$elem"
+    }
+    result should be("123")
+  }
+
+  test("TreeFoldable foldMap returns expected result") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
+    val result: String = TreeFoldable.foldMap[Int, String](t) { (i: Int) =>
+      (i + 1).toString
+    } (Monoid.stringMonoid)
+    result should be("234")
+  }
+
 }
 
