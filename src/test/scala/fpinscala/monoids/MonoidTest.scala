@@ -121,22 +121,14 @@ class MonoidTest extends FunSuite with Matchers {
   }
 
   test("monoidLaws should hold for WC Monoid") {
-    def chooseWC: Gen[WC] = {
-      val state = State(RNG.nonNegativeInt) map { n =>
-        if (n % 2 == 1) {
-          // TODO - gen string randomly
-          Stub("a")
-        }
-        else {
-          // TODO - gen strings
-          Part("b", n, "c")
-        }
-      }
-      Gen(state)
+    val genWC: Gen[Monoid.WC] = Gen.choose(1, 10).map2(Gen.string(10)) { (i, s) =>
+      if (i % 2 == 0) Stub(s)
+      else Part(s, i, s)
     }
+
     val wcMonoidLaws = Monoid.monoidLaws[WC](
       Monoid.wcMonoid,
-      chooseWC
+      genWC
     )
     // TODO - run returns unit but generates output to STDOUT
     Prop.run(wcMonoidLaws)
