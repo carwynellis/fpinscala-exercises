@@ -310,5 +310,10 @@ class MonoidTest extends FunSuite with Matchers {
     val fmFunc = fm.op(i => i + 4, i => i + 10)(2) should be(18)
   }
 
+  test("bag computes the expected 'bag' from an indexedSeq") {
+    val i = IndexedSeq("a", "rose", "is", "a", "rose")
+    Monoid.bag(i) should be(Map("a" -> 2, "rose" -> 2, "is" -> 1))
+  }
+
 }
 

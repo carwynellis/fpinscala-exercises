@@ -226,11 +226,21 @@ object Monoid {
     def zero = _ => B.zero
   }
 
-  def mapMergeMonoid[K,V](V: Monoid[V]): Monoid[Map[K, V]] =
-    sys.error("todo")
+  def mapMergeMonoid[K,V](V: Monoid[V]): Monoid[Map[K, V]] = new Monoid[Map[K, V]] {
+    def zero = Map[K,V]()
+    def op(a: Map[K, V], b: Map[K, V]) =
+      (a.keySet ++ b.keySet).foldLeft(zero) { (acc,k) =>
+        acc.updated(k, V.op(a.getOrElse(k, V.zero),
+          b.getOrElse(k, V.zero)))
+      }
+  }
 
-  def bag[A](as: IndexedSeq[A]): Map[A, Int] =
-    sys.error("todo")
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = {
+
+    def m = mapMergeMonoid[A, Int](intAddition)
+
+    as.foldLeft(Map.empty[A, Int])( (acc, elem) => m.op(acc, Map(elem -> 1)))
+  }
 }
 
 trait Foldable[F[_]] {
