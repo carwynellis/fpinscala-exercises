@@ -300,5 +300,10 @@ class MonoidTest extends FunSuite with Matchers {
     TreeFoldable.toList(t) should be(List(1,2,3))
   }
 
+  test("Product monoid composes a string and intadd monoid correctly") {
+    val pm = Monoid.productMonoid(Monoid.stringMonoid, Monoid.intAddition)
+    pm.op(("foo", 1), ("bar", 2)) should be("foobar", 3)
+  }
+
 }
 

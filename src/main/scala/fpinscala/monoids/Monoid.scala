@@ -216,8 +216,10 @@ object Monoid {
 
   }
 
-  def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
-    sys.error("todo")
+  def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] = new Monoid[(A,B)] {
+    def op(a1: (A, B), a2: (A, B)) = (A.op(a1._1, a2._1), B.op(a1._2, a2._2))
+    def zero = (A.zero, B.zero)
+  }
 
   def functionMonoid[A,B](B: Monoid[B]): Monoid[A => B] =
     sys.error("todo")
@@ -242,7 +244,7 @@ trait Foldable[F[_]] {
     foldRight(as)(mb.zero)((elem, acc) => mb.op(f(elem), acc))
 
   def concatenate[A](as: F[A])(m: Monoid[A]): A =
-    sys.error("todo")
+    foldLeft(as)(m.zero)(m.op)
 
   def toList[A](as: F[A]): List[A] =
     foldRight(as)(List.empty[A])( (elem, acc) => elem :: acc )
