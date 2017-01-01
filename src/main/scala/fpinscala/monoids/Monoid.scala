@@ -221,8 +221,10 @@ object Monoid {
     def zero = (A.zero, B.zero)
   }
 
-  def functionMonoid[A,B](B: Monoid[B]): Monoid[A => B] =
-    sys.error("todo")
+  def functionMonoid[A,B](B: Monoid[B]): Monoid[A => B] = new Monoid[A => B] {
+    def op(a1: (A) => B, a2: (A) => B) = (v: A) => B.op(a1(v), a2(v))
+    def zero = _ => B.zero
+  }
 
   def mapMergeMonoid[K,V](V: Monoid[V]): Monoid[Map[K, V]] =
     sys.error("todo")

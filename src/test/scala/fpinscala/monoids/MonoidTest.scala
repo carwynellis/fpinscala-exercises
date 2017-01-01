@@ -305,5 +305,10 @@ class MonoidTest extends FunSuite with Matchers {
     pm.op(("foo", 1), ("bar", 2)) should be("foobar", 3)
   }
 
+  test("Function monoid combines two functions for a given monoid") {
+    val fm = Monoid.functionMonoid[Int, Int](Monoid.intAddition)
+    val fmFunc = fm.op(i => i + 4, i => i + 10)(2) should be(18)
+  }
+
 }
 
