@@ -161,72 +161,72 @@ class MonoidTest extends FunSuite with Matchers {
   }
 
   test("ListFoldable foldRight returns expected result") {
-    val data = List(1, 2, 3, 4, 5)
-    val result: String = ListFoldable.foldRight(data)(""){ (elem, acc) =>
+    val l = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldRight(l)(""){ (elem, acc) =>
       acc + s"$elem"
     }
     result should be("54321")
   }
 
   test("ListFoldable foldLeft returns expected result") {
-    val data = List(1, 2, 3, 4, 5)
-    val result: String = ListFoldable.foldLeft(data)(""){ (acc, elem) =>
+    val l = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldLeft(l)(""){ (acc, elem) =>
       acc + s"$elem"
     }
     result should be("12345")
   }
 
   test("ListFoldable foldMap returns expected result") {
-    val data = List(1, 2, 3, 4, 5)
-    val result: String = ListFoldable.foldMap[Int, String](data) { (i: Int) =>
+    val l = List(1, 2, 3, 4, 5)
+    val result: String = ListFoldable.foldMap[Int, String](l) { (i: Int) =>
       (i + 1).toString
     } (Monoid.stringMonoid)
     result should be("23456")
   }
 
   test("IndexedSeqFoldable foldRight returns expected result") {
-    val data = IndexedSeq(1, 2, 3, 4, 5)
-    val result: String = IndexedSeqFoldable.foldRight(data)(""){ (elem, acc) =>
+    val i = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldRight(i)(""){ (elem, acc) =>
       acc + s"$elem"
     }
     result should be("54321")
   }
 
   test("IndexedSeqFoldable foldLeft returns expected result") {
-    val data = IndexedSeq(1, 2, 3, 4, 5)
-    val result: String = IndexedSeqFoldable.foldLeft(data)(""){ (acc, elem) =>
+    val i = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldLeft(i)(""){ (acc, elem) =>
       acc + s"$elem"
     }
     result should be("12345")
   }
 
   test("IndexedSeqFoldable foldMap returns expected result") {
-    val data = IndexedSeq(1, 2, 3, 4, 5)
-    val result: String = IndexedSeqFoldable.foldMap[Int, String](data) { (i: Int) =>
+    val i = IndexedSeq(1, 2, 3, 4, 5)
+    val result: String = IndexedSeqFoldable.foldMap[Int, String](i) { (i: Int) =>
       (i + 1).toString
     } (Monoid.stringMonoid)
     result should be("23456")
   }
 
   test("StreamFoldable foldRight returns expected result") {
-    val data = Stream(1, 2, 3, 4, 5)
-    val result: String = StreamFoldable.foldRight(data)(""){ (elem, acc) =>
+    val s = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldRight(s)(""){ (elem, acc) =>
       acc + s"$elem"
     }
     result should be("54321")
   }
 
   test("StreamFoldable foldLeft returns expected result") {
-    val data = Stream(1, 2, 3, 4, 5)
-    val result: String = StreamFoldable.foldLeft(data)(""){ (acc, elem) =>
+    val s = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldLeft(s)(""){ (acc, elem) =>
       acc + s"$elem"
     }
     result should be("12345")
   }
 
   test("StreamFoldable foldMap returns expected result") {
-    val data = Stream(1, 2, 3, 4, 5)
-    val result: String = StreamFoldable.foldMap[Int, String](data) { (i: Int) =>
+    val s = Stream(1, 2, 3, 4, 5)
+    val result: String = StreamFoldable.foldMap[Int, String](s) { (i: Int) =>
       (i + 1).toString
     } (Monoid.stringMonoid)
     result should be("23456")
@@ -242,7 +242,7 @@ class MonoidTest extends FunSuite with Matchers {
 
   test("TreeFoldable foldLeft returns expected result") {
     val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
-    val result: String = TreeFoldable.foldLeft(t)(""){ (acc, elem) =>
+    val result: String = TreeFoldable.foldLeft[Int, String](t)(""){ (acc, elem) =>
       acc + s"$elem"
     }
     result should be("123")
@@ -278,6 +278,26 @@ class MonoidTest extends FunSuite with Matchers {
       (i + 1).toString
     } (Monoid.stringMonoid)
     result should be("6")
+  }
+
+  test("OptionFoldable toList returns a single element list for Some value") {
+    val o = Some(5)
+    OptionFoldable.toList(o) should be(List(5))
+  }
+
+  test("OptionFoldable toList returns an empty list for None") {
+    val o = None
+    OptionFoldable.toList(o) should be(List.empty)
+  }
+
+  test("StreamFoldable toList returns the expected list") {
+    val s = Stream(1,2,3,4,5)
+    StreamFoldable.toList(s) should be(List(1,2,3,4,5))
+  }
+
+  test("TreeFoldable toList returns a list") {
+    val t = Branch(Leaf(1), Branch(Leaf(2), Leaf(3)))
+    TreeFoldable.toList(t) should be(List(1,2,3))
   }
 
 }

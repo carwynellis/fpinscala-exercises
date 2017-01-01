@@ -236,16 +236,16 @@ trait Foldable[F[_]] {
     foldMap(as)(f.curried)(endoMonoid[B])(z)
 
   def foldLeft[A, B](as: F[A])(z: B)(f: (B, A) => B): B =
-    sys.error("todo")
+    foldMap(as)(a => (b: B) => f(b,a))(dual(endoMonoid[B]))(z)
 
   def foldMap[A, B](as: F[A])(f: A => B)(mb: Monoid[B]): B =
-    foldLeft(as)(mb.zero)((acc,elem) => mb.op(acc, f(elem)))
+    foldRight(as)(mb.zero)((elem, acc) => mb.op(f(elem), acc))
 
   def concatenate[A](as: F[A])(m: Monoid[A]): A =
     sys.error("todo")
 
   def toList[A](as: F[A]): List[A] =
-    sys.error("todo")
+    foldRight(as)(List.empty[A])( (elem, acc) => elem :: acc )
 }
 
 object ListFoldable extends Foldable[List] {
