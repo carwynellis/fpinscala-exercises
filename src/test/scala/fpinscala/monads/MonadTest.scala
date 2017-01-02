@@ -52,4 +52,10 @@ class MonadTest extends FunSuite with Matchers {
 
     Monad.listMonad.flatMap(l)((i: Int) => List(i + 1)) should be(List(2,3,4))
   }
+
+  test("join returns a List(1) with given a List(List(1)) for the list monad") {
+    val l = List(List(1))
+
+    Monad.listMonad.join(l) should be(List(1))
+  }
 }
