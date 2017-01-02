@@ -38,4 +38,14 @@ class MonadTest extends FunSuite with Matchers {
     om.replicateM(3, o) should be(Some(List(1, 1, 1)))
   }
 
+  test("filterM returns expected result for list monad") {
+    val lm = Monad.listMonad
+
+    val l = List(1,2,3,4,5)
+
+    val result = lm.filterM(l) { (i: Int) => lm.unit(i % 2 == 0) }
+
+    result should be(List(List(2,4)))
+  }
+
 }

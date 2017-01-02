@@ -47,6 +47,22 @@ trait Monad[M[_]] extends Functor[M] {
 
   def replicateM[A](n: Int, ma: M[A]): M[List[A]] = sequence(List.fill(n)(ma))
 
+  def product[A,B](ma: M[A], mb: M[B]): M[(A, B)] = map2(ma, mb)((_, _))
+
+  // Tried using traverse with inner map/flatmap but there's no way to
+  // represent the empty value for the false case so looks like some sort of
+  // recursive approach is needed for now.
+  def filterM[A](ms: List[A])(f: A => M[Boolean]): M[List[A]] = ms match {
+    case Nil => unit(Nil)
+    case h :: t => flatMap(f(h)) { b =>
+      // Filter returned a true value so retain the current value.
+      if (b) map(filterM(t)(f))(h :: _)
+      // Filter returned false so continue the recursion discarding the
+      // current value.
+      else filterM(t)(f)
+    }
+  }
+
   def compose[A,B,C](f: A => M[B], g: B => M[C]): A => M[C] = ???
 
   // Implement in terms of `compose`:
