@@ -106,7 +106,17 @@ object Monad {
       ma flatMap f
   }
 
-  def stateMonad[S] = ???
+  // This uses the type lambda style from the solutions.
+  // Ensures we can override the flatMap method correctly since this defines an
+  // argument ma with type M[A]. Without defining an explicit type we cannot
+  // override the flatMap since state has two types, e.g. State[S,A].
+  def stateMonad[S] = new Monad[({type f[x] = State[S, x]})#f] {
+
+    override def unit[A](a: => A): State[S,A] = State(s => (a, s))
+
+    def flatMap[A, B](ma: State[S, A])(f: (A) => State[S, B]) =
+      ma.flatMap(f)
+  }
 
   val idMonad: Monad[Id] = ???
 
