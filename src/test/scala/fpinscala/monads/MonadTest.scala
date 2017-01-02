@@ -50,12 +50,18 @@ class MonadTest extends FunSuite with Matchers {
   test("_flatMap returns expected result for list monad") {
     val l = List(1,2,3)
 
-    Monad.listMonad.flatMap(l)((i: Int) => List(i + 1)) should be(List(2,3,4))
+    Monad.listMonad._flatMap(l)((i: Int) => List(i + 1)) should be(List(2,3,4))
   }
 
   test("join returns a List(1) with given a List(List(1)) for the list monad") {
     val l = List(List(1))
 
     Monad.listMonad.join(l) should be(List(1))
+  }
+
+  test("__flatMap returns expected result for list monad") {
+    val l = List(1,2,3)
+
+    Monad.listMonad.__flatMap(l)((i: Int) => List(i + 1)) should be(List(2,3,4))
   }
 }
