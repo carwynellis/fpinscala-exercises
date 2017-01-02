@@ -32,6 +32,8 @@ trait Parsers[Parser[+_]] { self => // so inner classes may call methods of trai
 
   def or[A](s1: Parser[A], s2: Parser[A]): Parser[A]
 
+  def flatMap[A,B](p: Parser[A])(f: A => Parser[B]): Parser[B]
+
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
     if (n > 1) map2(p, nonStrict(listOfN(n - 1, p)))(_ :: _)
     else succeed(List.empty[A])

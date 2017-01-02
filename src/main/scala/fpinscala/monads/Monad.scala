@@ -56,21 +56,55 @@ trait Monad[M[_]] extends Functor[M] {
 case class Reader[R, A](run: R => A)
 
 object Monad {
+
   val genMonad = new Monad[Gen] {
-    def unit[A](a: => A): Gen[A] = Gen.unit(a)
+
+    override def unit[A](a: => A): Gen[A] = Gen.unit(a)
+
     override def flatMap[A,B](ma: Gen[A])(f: A => Gen[B]): Gen[B] =
       ma flatMap f
   }
 
-  val parMonad: Monad[Par] = ???
+  val parMonad: Monad[Par] = new Monad[Par] {
 
-  def parserMonad[P[+_]](p: Parsers[P]): Monad[P] = ???
+    override def unit[A](a: => A) = Par.unit(a)
 
-  val optionMonad: Monad[Option] = ???
+    override def flatMap[A, B](ma: Par[A])(f: (A) => Par[B]) =
+      Par.flatMap(ma)(f)
+  }
 
-  val streamMonad: Monad[Stream] = ???
+  def parserMonad[P[+_]](p: Parsers[P]): Monad[P] = new Monad[P] {
 
-  val listMonad: Monad[List] = ???
+    override def unit[A](a: => A) = p.succeed(a)
+
+    override def flatMap[A, B](ma: P[A])(f: (A) => P[B]) =
+      p.flatMap(ma)(f)
+
+  }
+
+  val optionMonad: Monad[Option] = new Monad[Option] {
+
+    override def unit[A](a: => A) = Option(a)
+
+    override def flatMap[A, B](ma: Option[A])(f: (A) => Option[B]) =
+      ma flatMap f
+  }
+
+  val streamMonad: Monad[Stream] = new Monad[Stream] {
+
+    override def unit[A](a: => A) = Stream(a)
+
+    override def flatMap[A, B](ma: Stream[A])(f: (A) => Stream[B]) =
+      ma flatMap f
+  }
+
+  val listMonad: Monad[List] = new Monad[List] {
+
+    override def unit[A](a: => A) = List(a)
+
+    override def flatMap[A, B](ma: List[A])(f: (A) => List[B]) =
+      ma flatMap f
+  }
 
   def stateMonad[S] = ???
 
