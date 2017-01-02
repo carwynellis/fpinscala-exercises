@@ -48,4 +48,14 @@ class MonadTest extends FunSuite with Matchers {
     result should be(List(List(2,4)))
   }
 
+  test("compose composes two kleisli arrows correctly for option monad") {
+    val om = Monad.optionMonad
+
+    val f = (i: Int) => Some(i + 1)
+    val g = (i: Int) => Some(i * 2)
+
+    om.compose(f, g)(1) should be(Some(4))
+
+  }
+
 }
