@@ -22,4 +22,20 @@ class MonadTest extends FunSuite with Matchers {
     lm.traverse(l)(f) should be(List(List(2,3,4)))
   }
 
+  test("replicateM returns expected result for list monad") {
+    val lm = Monad.listMonad
+
+    val l = List(1)
+
+    lm.replicateM(3, l) should be(List(List(1, 1, 1)))
+  }
+
+  test("replicateM returns expected result for option monad") {
+    val om = Monad.optionMonad
+
+    val o = Some(1)
+
+    om.replicateM(3, o) should be(Some(List(1, 1, 1)))
+  }
+
 }
