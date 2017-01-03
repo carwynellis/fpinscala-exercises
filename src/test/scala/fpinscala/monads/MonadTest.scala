@@ -102,4 +102,33 @@ class MonadTest extends FunSuite with Matchers with MockitoSugar {
 
     result should be(3)
   }
+
+  test("reader monad unit returns expected result") {
+    val rm = Reader.readerMonad[String].unit(2)
+    // Unit ignores the R argument returning the value passed in.
+    rm.run("foo") should be(2)
+  }
+
+  test("reader monad flatMap returns expected result") {
+    val slm = Reader((r: String) => r.length)
+
+    Reader.readerMonad.flatMap(slm) { (i: Int) =>
+      Reader.readerMonad.unit(i + 1)
+    }.run("foo") should be(4)
+  }
+
+  test("reader monad sequence returns expected result") {
+    // Sequence allows a single argument R to be applied to a number of
+    // readers. The argument is passed to each reader in turn.
+    // A rather contrived example that illustrates this.
+    val l = List(
+      Reader((r: String) => r.length),
+      Reader((r: String) => if (r == "foo") 1 else 0),
+      Reader((r: String) => if (r.contains("o")) 1 else 0)
+    )
+
+    // The result of each function is present in the result in the same order
+    // as the input list of Readers.
+    Reader.readerMonad.sequence(l).run("foo") should be(List(3, 1, 1))
+  }
 }
