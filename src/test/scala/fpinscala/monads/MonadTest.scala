@@ -1,8 +1,10 @@
 package fpinscala.monads
 
+import fpinscala.state.{RNG, State}
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, Matchers}
 
-class MonadTest extends FunSuite with Matchers {
+class MonadTest extends FunSuite with Matchers with MockitoSugar {
 
   test("sequence returns expected result for list monad") {
     val l = List(List(1), List(2), List(3))
@@ -63,5 +65,41 @@ class MonadTest extends FunSuite with Matchers {
     val l = List(1,2,3)
 
     Monad.listMonad.__flatMap(l)((i: Int) => List(i + 1)) should be(List(2,3,4))
+  }
+
+  test("replicateM returns expected result for state monad") {
+    val mockRNG = mock[RNG]
+
+    val s = State.unit[RNG, Int](1)
+
+    val (result, _) = Monad.stateMonad.replicateM(3, s).run(mockRNG)
+
+    result should be(List(1,1,1))
+  }
+
+  test("sequence returns expected result for state monad") {
+    val mockRNG = mock[RNG]
+
+    val ls = List(
+      State.unit[RNG, Int](1),
+      State.unit[RNG, Int](2),
+      State.unit[RNG, Int](3)
+    )
+
+    val (result, _) = Monad.stateMonad.sequence(ls).run(mockRNG)
+
+    result should be(List(1,2,3))
+  }
+
+  test("map2 returns expected result for state monad") {
+    val mockRNG = mock[RNG]
+
+    val (result, _) = Monad.stateMonad.map2(
+      State.unit[RNG, Int](1),
+      State.unit[RNG, Int](2)
+    )(_ + _)
+    .run(mockRNG)
+
+    result should be(3)
   }
 }
