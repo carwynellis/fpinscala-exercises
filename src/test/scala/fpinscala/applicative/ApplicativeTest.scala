@@ -25,4 +25,21 @@ class ApplicativeTest extends FunSuite with Matchers {
 
   }
 
+  test("sequenceMap produces expected result on stream applicative") {
+    val sa = Applicative.streamApplicative
+
+    val input = Map(
+      "foo" -> Stream(1,2,3),
+      "bar" -> Stream(4,5,6)
+    )
+
+    val expected = Stream(
+      Map("foo" -> 1, "bar" -> 4),
+      Map("foo" -> 2, "bar" -> 5),
+      Map("foo" -> 3, "bar" -> 6)
+    )
+
+    sa.sequenceMap(input) should be(expected)
+  }
+
 }

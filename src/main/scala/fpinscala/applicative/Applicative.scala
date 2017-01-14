@@ -66,7 +66,14 @@ trait Applicative[F[_]] extends Functor[F] {
     }
   }
 
-  def sequenceMap[K,V](ofa: Map[K,F[V]]): F[Map[K,V]] = ???
+  def sequenceMap[K,V](ofa: Map[K,F[V]]): F[Map[K,V]] = {
+    val l: F[List[(K, V)]] = traverse(ofa.toList) { (t) =>
+      val (key, fV) = t
+      map(fV)(v => (key, v))
+    }
+    map(l)(_.toMap)
+  }
+
 }
 
 case class Tree[+A](head: A, tail: List[Tree[A]])
